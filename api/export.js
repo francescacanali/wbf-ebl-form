@@ -1,20 +1,15 @@
 import postgres from 'postgres';
 
+export const maxDuration = 30;
+
 const sql = postgres(process.env.POSTGRES_URL, { ssl: 'require' });
 
-function jsonRes(status, body){
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { 'Content-Type':'application/json' }
-  });
-}
-
-export default async function handler(request){
+export default async function handler(req, res){
   /* Password is sent via X-Admin-Password header.
      Set ADMIN_PASSWORD in your Vercel project → Settings → Environment Variables. */
-  const password = request.headers.get('x-admin-password') || '';
+  const password = req.headers['x-admin-password'] || '';
   if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD){
-    return jsonRes(401, { error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' });
   }
 
   try {
@@ -36,9 +31,9 @@ export default async function handler(request){
       FROM registrations
       ORDER BY submitted_at DESC
     `;
-    return jsonRes(200, { rows });
+    return res.status(200).json({ rows });
   } catch (err){
-    console.error('export error:', err);
-    return jsonRes(500, { error: 'Server error.' });
+    console.error('[export] error:', err);
+    return res.status(500).json({ error: 'Server error.' });
   }
 }
