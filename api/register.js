@@ -102,22 +102,20 @@ export default async function handler(req, res){
 
     console.log('[register] validation OK');
 
-    /* Upload photo to private Vercel Blob */
+    /* Upload photo to private Vercel Blob using access: 'private' */
     const sanitize = s => s.replace(/[^A-Za-z0-9]/g, '_');
     const ext      = (photo.filename.split('.').pop() || 'jpg').toLowerCase().slice(0, 5);
     const pathname = `photos/${sanitize(familyName)}_${sanitize(givenName)}_${Date.now()}.${ext}`;
 
     console.log('[register] uploading blob:', pathname);
-    /* For private stores in @vercel/blob v1.x, no `access` parameter is required;
-       the SDK detects the store type automatically via the token. */
     const blob = await put(pathname, photo.buffer, {
+      access: 'private',
       contentType: photo.mimeType,
       addRandomSuffix: false,
     });
     console.log('[register] blob uploaded', { elapsedMs: Date.now() - t0, returnedUrl: blob.url });
 
-    /* Store BOTH the pathname (for proxy access) and the URL (returned by SDK).
-       The proxy endpoint will use the pathname; the URL is kept as backup. */
+    /* Store the pathname — admin viewer fetches photos through /api/photo proxy */
     console.log('[register] inserting row...');
     const rows = await sql`
       INSERT INTO registrations
