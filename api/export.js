@@ -5,8 +5,6 @@ export const maxDuration = 30;
 const sql = postgres(process.env.POSTGRES_URL, { ssl: 'require' });
 
 export default async function handler(req, res){
-  /* Password is sent via X-Admin-Password header.
-     Set ADMIN_PASSWORD in your Vercel project → Settings → Environment Variables. */
   const password = req.headers['x-admin-password'] || '';
   if (!process.env.ADMIN_PASSWORD || password !== process.env.ADMIN_PASSWORD){
     return res.status(401).json({ error: 'Unauthorized' });
