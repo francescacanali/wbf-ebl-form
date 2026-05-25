@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBF — Player Registration</title>
+<meta name="description" content="Official player registration form for the WBF / EBL shared database.">
+<style>
+:root{
+  --bg:#fafaf9;
+  --surface:#ffffff;
+  --ink:#0a0a0a;
+  --ink-2:#3f3f46;
+  --ink-3:#71717a;
+  --ink-4:#a1a1aa;
+  --line:#e7e5e4;
+  --line-2:#f5f5f4;
+
+  --green-900:#0f3d2e;
+  --green-800:#14532d;
+  --green-700:#166534;
+  --green-600:#15803d;
+  --green-50:#f0fdf4;
+
+  --error:#b91c1c;
+  --error-bg:#fef2f2;
+
+  --radius:10px;
+  --radius-sm:6px;
+  --radius-lg:14px;
+
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg:0 20px 40px -12px rgba(15,23,42,.18),0 8px 16px -8px rgba(15,23,42,.10);
+
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Helvetica Neue',
+        'PingFang SC','Hiragino Sans GB','Microsoft YaHei',Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Menlo','Consolas',monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--ink);
+  font-size:17px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+
+.shell{max-width:680px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+
+/* === Language selector === */
+.lang-bar{
+  display:flex;justify-content:center;
+  margin-bottom:2rem;
+}
+.lang-selector{
+  display:flex;align-items:center;gap:.15rem;
+  padding:.3rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:99px;
+  box-shadow:var(--shadow-sm);
+  flex-wrap:wrap;justify-content:center;
+}
+.lang-btn{
+  font-family:var(--font);font-size:.9rem;font-weight:500;
+  padding:.5rem 1rem;background:transparent;color:var(--ink-2);
+  border:none;border-radius:99px;cursor:pointer;
+  transition:background .15s, color .15s;
+  white-space:nowrap;
+}
+.lang-btn:hover{background:var(--line-2)}
+.lang-btn.active{background:var(--green-800);color:#fff;font-weight:600}
+
+/* === Header === */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem;gap:1rem}
+.brand{display:flex;align-items:center;gap:.85rem}
+.brand-logo{
+  height:42px;width:auto;display:block;
+  object-fit:contain;flex-shrink:0;
+}
+.brand-mark{
+  width:32px;height:32px;background:var(--green-800);color:#fff;
+  border-radius:8px;display:grid;place-items:center;
+  font-weight:700;font-size:.9rem;letter-spacing:-.02em;
+}
+.brand-text{
+  display:flex;flex-direction:column;
+  font-weight:600;font-size:1rem;letter-spacing:-.01em;
+  line-height:1.2;color:var(--ink);
+}
+.brand-text span{
+  color:var(--ink-3);font-weight:400;font-size:.82rem;
+  margin-top:1px;letter-spacing:.01em;
+}
+.header-tag{
+  font-size:.82rem;color:var(--ink-3);background:var(--surface);
+  border:1px solid var(--line);padding:.4rem .75rem;border-radius:99px;
+  display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;
+}
+.header-tag::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green-600);box-shadow:0 0 0 3px rgba(21,128,61,.15);
+}
+
+/* === Intro === */
+.intro{margin-bottom:2.5rem}
+.intro h1{font-size:2.25rem;font-weight:700;letter-spacing:-.022em;line-height:1.15;margin-bottom:.85rem}
+.intro h1 .accent{color:var(--green-800)}
+.intro p{color:var(--ink-2);font-size:1.05rem;max-width:580px;line-height:1.6}
+
+/* === Form === */
+.form-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-sm);
+}
+.section + .section{margin-top:2rem;padding-top:2rem;border-top:1px solid var(--line-2)}
+.section-head{display:flex;align-items:center;gap:.65rem;margin-bottom:1.25rem}
+.section-num{
+  width:24px;height:24px;background:var(--green-50);color:var(--green-800);
+  border-radius:6px;display:grid;place-items:center;
+  font-size:.78rem;font-weight:700;font-variant-numeric:tabular-nums;
+}
+.section-title{font-size:1.05rem;font-weight:600;letter-spacing:-.005em}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:.95rem}
+.grid-full{grid-column:1 / -1}
+
+.field{display:flex;flex-direction:column;gap:.4rem;position:relative}
+.field label{font-size:.88rem;font-weight:500;color:var(--ink-2)}
+.field label .req{color:var(--green-700);margin-left:2px;font-weight:600}
+
+.field input,.field select{
+  font-family:var(--font);font-size:1rem;padding:.75rem .85rem;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);color:var(--ink);outline:none;
+  width:100%;appearance:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input::placeholder{color:var(--ink-4)}
+.field input:hover,.field select:hover{border-color:#d4d4d8}
+.field input:focus,.field select:focus{
+  border-color:var(--green-700);box-shadow:0 0 0 3px rgba(22,101,52,.12);
+}
+.field select{
+  background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%2371717a' d='M6 7.5L0.5 2 1.91 0.59 6 4.67 10.09 0.59 11.5 2z'/></svg>") no-repeat right .85rem center;
+  background-size:12px;padding-right:2.1rem;cursor:pointer;
+}
+.field .hint{font-size:.82rem;color:var(--ink-3);margin-top:.2rem}
+.field .err{font-size:.82rem;color:var(--error);margin-top:.2rem;display:none}
+.field.invalid input,.field.invalid select{border-color:var(--error);background-color:var(--error-bg)}
+.field.invalid input:focus,.field.invalid select:focus{box-shadow:0 0 0 3px rgba(185,28,28,.10)}
+.field.invalid .err{display:block}
+.field.invalid .hint{display:none}
+
+/* === Photo upload === */
+.photo-up{
+  border:1px dashed var(--line);border-radius:var(--radius);
+  padding:.9rem;display:flex;align-items:center;gap:.9rem;
+  cursor:pointer;background:var(--surface);
+  transition:background .15s, border-color .15s;
+}
+.photo-up:hover{background:var(--green-50);border-color:var(--green-700)}
+.photo-up input[type=file]{display:none}
+.photo-preview{
+  width:54px;height:68px;background:var(--line-2);border-radius:6px;
+  flex-shrink:0;background-size:cover;background-position:center;
+  display:grid;place-items:center;color:var(--ink-3);font-size:1.3rem;
+}
+.photo-info{flex:1;min-width:0}
+.photo-info strong{
+  display:block;font-size:1rem;font-weight:600;margin-bottom:3px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.photo-info small{font-size:.82rem;color:var(--ink-3)}
+.photo-edit{
+  font-size:.8rem;font-weight:600;color:var(--green-700);
+  background:var(--green-50);padding:.3rem .65rem;border-radius:99px;
+  margin-left:auto;display:none;
+}
+.photo-up.has-photo .photo-edit{display:inline-block}
+
+/* === Banner === */
+.banner{
+  display:none;margin-top:1rem;padding:.8rem 1rem;
+  background:var(--error-bg);border:1px solid #fecaca;
+  border-radius:var(--radius);font-size:.92rem;color:var(--error);
+}
+.banner.active{display:block}
+
+/* === Actions === */
+.actions{
+  margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--line-2);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.disclaimer{font-size:.85rem;color:var(--ink-3);max-width:330px;line-height:1.5}
+.btn{
+  font-family:var(--font);font-size:.95rem;font-weight:600;
+  padding:.8rem 1.6rem;background:var(--green-800);color:#fff;
+  border:none;border-radius:var(--radius);cursor:pointer;
+  display:inline-flex;align-items:center;gap:.5rem;
+  transition:background .15s, transform .1s, box-shadow .15s;
+  box-shadow:0 1px 2px rgba(15,61,46,.2), inset 0 1px 0 rgba(255,255,255,.1);
+  white-space:nowrap;
+}
+.btn:hover{
+  background:var(--green-700);
+  box-shadow:0 4px 12px rgba(15,61,46,.22), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.65;cursor:wait}
+.btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line);box-shadow:none}
+.btn-ghost:hover{background:var(--line-2);box-shadow:none}
+
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* === Success === */
+.success{display:none;text-align:center;padding:2rem 1.5rem}
+.success.active{display:block}
+.success-mark{
+  width:60px;height:60px;background:var(--green-50);color:var(--green-700);
+  border-radius:50%;display:grid;place-items:center;
+  margin:0 auto 1.5rem;font-size:1.8rem;
+}
+.success h2{font-size:1.55rem;font-weight:700;margin-bottom:.7rem;letter-spacing:-.015em}
+.success p{color:var(--ink-2);font-size:1.02rem;max-width:460px;margin:0 auto .75rem;line-height:1.6}
+.ref-id{
+  background:var(--line-2);padding:.7rem 1rem;border-radius:var(--radius-sm);
+  margin:1.5rem auto;max-width:320px;font-size:.92rem;color:var(--ink-2);
+  font-family:var(--mono);border:1px solid var(--line);
+}
+.ref-id strong{color:var(--green-800)}
+
+.footer{margin-top:2.5rem;font-size:.82rem;color:var(--ink-4);text-align:center}
+
+/* === Cropper modal === */
+.cropper-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,10,10,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  padding:1.5rem;z-index:1000;
+  opacity:0;transition:opacity .2s ease;
+}
+.cropper-overlay.active{display:flex;opacity:1}
+.cropper-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  width:100%;max-width:380px;
+  display:flex;flex-direction:column;
+  transform:scale(.96);transition:transform .2s ease;
+}
+.cropper-overlay.active .cropper-card{transform:scale(1)}
+.cropper-head{padding:1.1rem 1.25rem .75rem;border-bottom:1px solid var(--line-2)}
+.cropper-head h3{font-size:1.1rem;font-weight:600;letter-spacing:-.005em;margin-bottom:.25rem}
+.cropper-head p{font-size:.85rem;color:var(--ink-3)}
+.cropper-body{padding:1.25rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.cropper-canvas-wrap{
+  position:relative;width:250px;height:313px;
+  border-radius:var(--radius);overflow:hidden;background:#000;
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+.cropper-canvas-wrap canvas{
+  display:block;width:100%;height:100%;
+  cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;
+}
+.cropper-canvas-wrap canvas:active{cursor:grabbing}
+.cropper-canvas-wrap::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to right, transparent calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% + .5px), transparent calc(33.33% + .5px)),
+    linear-gradient(to right, transparent calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+    linear-gradient(to bottom, transparent calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% + .5px), transparent calc(33.33% + .5px)),
+    linear-gradient(to bottom, transparent calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% + .5px), transparent calc(66.66% + .5px));
+  border:2px solid rgba(255,255,255,.6);border-radius:var(--radius);
+}
+.cropper-zoom{width:100%;display:flex;align-items:center;gap:.65rem;padding:0 .25rem}
+.cropper-zoom svg{width:16px;height:16px;flex-shrink:0;stroke:var(--ink-3);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.cropper-zoom input[type=range]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:4px;background:var(--line);border-radius:2px;outline:none;
+}
+.cropper-zoom input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green-800);cursor:grab;
+  box-shadow:0 1px 3px rgba(15,61,46,.3);border:2px solid #fff;
+}
+.cropper-zoom input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green-800);cursor:grab;
+  border:2px solid #fff;box-shadow:0 1px 3px rgba(15,61,46,.3);
+}
+.cropper-help{font-size:.82rem;color:var(--ink-3);text-align:center}
+.cropper-foot{
+  display:flex;gap:.5rem;padding:1rem 1.25rem 1.25rem;
+  border-top:1px solid var(--line-2);
+}
+.cropper-foot .btn{flex:1;justify-content:center;font-size:.92rem;padding:.7rem 1rem}
+
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.reveal{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards}
+.reveal:nth-child(1){animation-delay:.02s}
+.reveal:nth-child(2){animation-delay:.1s}
+.reveal:nth-child(3){animation-delay:.18s}
+.reveal:nth-child(4){animation-delay:.26s}
+
+@media (max-width:640px){
+  .shell{padding:1.5rem 1.1rem 3rem}
+  .form-card{padding:1.5rem 1.1rem;border-radius:12px}
+  .intro h1{font-size:1.85rem}
+  .grid{grid-template-columns:1fr;gap:.9rem}
+  .actions{flex-direction:column;align-items:stretch}
+  .btn{justify-content:center;padding:.9rem 1.5rem}
+  .header{margin-bottom:2rem}
+  .section + .section{margin-top:1.75rem;padding-top:1.75rem}
+  .cropper-card{max-width:none}
+  .cropper-canvas-wrap{width:230px;height:288px}
+  .lang-btn{font-size:.82rem;padding:.45rem .8rem}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- LANGUAGE SELECTOR -->
+  <nav class="lang-bar reveal" aria-label="Language">
+    <div class="lang-selector">
+      <button type="button" class="lang-btn" data-lang="en">English</button>
+      <button type="button" class="lang-btn" data-lang="fr">Français</button>
+      <button type="button" class="lang-btn" data-lang="es">Español</button>
+      <button type="button" class="lang-btn" data-lang="de">Deutsch</button>
+      <button type="button" class="lang-btn" data-lang="pl">Polski</button>
+      <button type="button" class="lang-btn" data-lang="zh">中文</button>
+    </div>
+  </nav>
+
+  <header class="header reveal">
+    <div class="brand">
+      <img src="https://championships.worldbridge.org/wp-content/uploads/2026/01/WBF-transp@3x.png" alt="WBF" class="brand-logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'brand-mark',textContent:'W'}))">
+      <div class="brand-text">
+        World Bridge Federation
+        <span data-i18n="brand_sub">Player Registration</span>
+      </div>
+    </div>
+    <div class="header-tag" data-i18n="secure_form">Secure form</div>
+  </header>
+
+  <section class="intro reveal">
+    <h1 data-i18n-html="intro_title">Player <span class="accent">registration</span>.</h1>
+    <p data-i18n="intro_text">Add your profile to the World Bridge Federation &amp; European Bridge League shared player database. Name fields accept Latin letters only — no accents.</p>
+  </section>
+
+  <main id="formMain" class="reveal">
+
+    <form class="form-card" id="registrationForm" novalidate autocomplete="on">
+
+      <!-- 01 IDENTITY -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">1</span><h2 class="section-title" data-i18n="sec1_title">Identity</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="familyName"><span data-i18n="label_family">Family name</span><span class="req">*</span></label>
+            <input type="text" id="familyName" name="familyName" required maxlength="60" autocomplete="family-name" placeholder="Rossi" data-i18n-placeholder="placeholder_family">
+            <div class="hint" data-i18n="hint_latin">Latin letters only · no accents.</div>
+            <div class="err" data-i18n="err_latin">Use only basic Latin letters (A–Z), no accents.</div>
+          </div>
+          <div class="field">
+            <label for="givenName"><span data-i18n="label_given">Given name</span><span class="req">*</span></label>
+            <input type="text" id="givenName" name="givenName" required maxlength="60" autocomplete="given-name" placeholder="Marco" data-i18n-placeholder="placeholder_given">
+            <div class="hint" data-i18n="hint_latin">Latin letters only · no accents.</div>
+            <div class="err" data-i18n="err_latin">Use only basic Latin letters (A–Z), no accents.</div>
+          </div>
+          <div class="field">
+            <label for="gender"><span data-i18n="label_gender">Gender</span><span class="req">*</span></label>
+            <select id="gender" name="gender" required>
+              <option value="" data-i18n="select_placeholder">Select…</option>
+              <option value="Female" data-i18n="gender_female">Female</option>
+              <option value="Male" data-i18n="gender_male">Male</option>
+            </select>
+            <div class="err" data-i18n="err_gender">Please select a gender.</div>
+          </div>
+          <div class="field">
+            <label for="dateOfBirth"><span data-i18n="label_dob">Date of birth</span><span class="req">*</span></label>
+            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            <div class="err" data-i18n="err_dob">Please enter a valid date.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 ORIGIN & CONTACT -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">2</span><h2 class="section-title" data-i18n="sec2_title">Origin &amp; contact</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="countryBirth"><span data-i18n="label_country_birth">Country of birth</span><span class="req">*</span></label>
+            <select id="countryBirth" name="countryBirth" required></select>
+            <div class="err" data-i18n="err_country_birth">Please select your country of birth.</div>
+          </div>
+          <div class="field">
+            <label for="countryResidence"><span data-i18n="label_country_res">Country of residence</span><span class="req">*</span></label>
+            <select id="countryResidence" name="countryResidence" required></select>
+            <div class="err" data-i18n="err_country_res">Please select your country of residence.</div>
+          </div>
+          <div class="field">
+            <label for="email"><span data-i18n="label_email">E-mail</span><span class="req">*</span></label>
+            <input type="email" id="email" name="email" required maxlength="120" autocomplete="email" placeholder="name@example.com">
+            <div class="err" data-i18n="err_email">Please enter a valid e-mail address.</div>
+          </div>
+          <div class="field">
+            <label for="phone"><span data-i18n="label_phone">Phone</span><span class="req">*</span></label>
+            <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel" placeholder="+39 333 1234567">
+            <div class="hint" data-i18n="hint_phone">Include country code.</div>
+            <div class="err" data-i18n="err_phone">Please enter a valid phone number.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 AFFILIATION & PHOTO -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">3</span><h2 class="section-title" data-i18n="sec3_title">Affiliation &amp; photograph</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="affiliationCode"><span data-i18n="label_affiliation">National affiliation code</span><span class="req">*</span></label>
+            <input type="text" id="affiliationCode" name="affiliationCode" required maxlength="40" placeholder="ITA-12345">
+            <div class="hint" data-i18n="hint_affiliation">Federation code or membership number.</div>
+            <div class="err" data-i18n="err_affiliation">Please enter your affiliation code.</div>
+          </div>
+          <div class="field">
+            <label for="chineseName"><span data-i18n="label_chinese_name">Chinese name</span> · 中文姓名</label>
+            <input type="text" id="chineseName" name="chineseName" maxlength="40" placeholder="可选 · Optional">
+            <div class="hint" data-i18n="hint_chinese_name">Optional · Chinese characters accepted.</div>
+          </div>
+          <div class="field grid-full">
+            <label for="photo"><span data-i18n="label_photo">Profile photograph</span><span class="req">*</span></label>
+            <label class="photo-up" for="photo" id="photoUp">
+              <div class="photo-preview" id="photoPreview">+</div>
+              <div class="photo-info">
+                <strong id="photoLabel" data-i18n="photo_label_upload">Upload a photograph</strong>
+                <small id="photoSize" data-i18n="photo_hint_default">JPG, PNG or WEBP · A cropping tool will open after selection</small>
+              </div>
+              <span class="photo-edit" id="photoEdit" data-i18n="photo_recrop">Re-crop</span>
+              <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" required>
+            </label>
+            <div class="err" data-i18n="err_photo">A profile photograph is required.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="banner" id="errorBanner"></div>
+
+      <div class="actions">
+        <p class="disclaimer" data-i18n="disclaimer">By submitting you authorise WBF and EBL to store the data above in their shared player database.</p>
+        <button type="submit" class="btn" id="submitBtn">
+          <span id="submitIcon"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span id="submitText" data-i18n="btn_submit">Submit registration</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="form-card success" id="successPanel">
+      <div class="success-mark">✓</div>
+      <h2 data-i18n="success_title">Registration received</h2>
+      <p data-i18n="success_text">Your profile has been added to the WBF · EBL shared database. A confirmation will be sent to the e-mail address provided.</p>
+      <div class="ref-id"><span data-i18n="ref_label">Reference</span>: <strong id="refId"></strong></div>
+      <button type="button" class="btn" onclick="resetForm()" data-i18n="btn_submit_another">Submit another</button>
+    </div>
+
+  </main>
+
+  <footer class="footer">WBF · EBL Member Database</footer>
+</div>
+
+<!-- =========== CROPPER MODAL =========== -->
+<div class="cropper-overlay" id="cropperOverlay" role="dialog" aria-modal="true">
+  <div class="cropper-card">
+    <div class="cropper-head">
+      <h3 data-i18n="cropper_title">Adjust your photograph</h3>
+      <p data-i18n="cropper_subtitle">Drag to position your face inside the frame.</p>
+    </div>
+    <div class="cropper-body">
+      <div class="cropper-canvas-wrap">
+        <canvas id="cropperCanvas" width="250" height="313"></canvas>
+      </div>
+      <div class="cropper-zoom">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+        <input type="range" id="cropperZoom" min="1" max="4" step="0.01" value="1">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+      </div>
+      <p class="cropper-help" data-i18n="cropper_help">Centre your face within the grid · output 500×626 px</p>
+    </div>
+    <div class="cropper-foot">
+      <button type="button" class="btn btn-ghost" id="cropperCancel" data-i18n="btn_cancel">Cancel</button>
+      <button type="button" class="btn" id="cropperApply">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        <span data-i18n="btn_apply">Apply</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   I18N — all UI strings in 6 languages
+========================================================= */
+const I18N = {
+  en: {
+    brand_sub: "Player Registration",
+    secure_form: "Secure form",
+    intro_title: 'Player <span class="accent">registration</span>.',
+    intro_text: "Add your profile to the World Bridge Federation & European Bridge League shared player database. Name fields accept Latin letters only — no accents.",
+    sec1_title: "Identity", sec2_title: "Origin & contact", sec3_title: "Affiliation & photograph",
+    label_family: "Family name", label_given: "Given name", label_gender: "Gender", label_dob: "Date of birth",
+    label_country_birth: "Country of birth", label_country_res: "Country of residence",
+    label_email: "E-mail", label_phone: "Phone", label_affiliation: "National affiliation code",
+    label_chinese_name: "Chinese name", label_photo: "Profile photograph",
+    placeholder_family: "Rossi", placeholder_given: "Marco",
+    hint_latin: "Latin letters only · no accents.",
+    hint_phone: "Include country code.",
+    hint_affiliation: "Federation code or membership number.",
+    hint_chinese_name: "Optional · Chinese characters accepted.",
+    photo_hint_default: "JPG, PNG or WEBP · A cropping tool will open after selection",
+    err_latin: "Use only basic Latin letters (A–Z), no accents.",
+    err_latin_specific: '"{ch}" is not allowed — Latin letters only, no accents.',
+    err_gender: "Please select a gender.", err_dob: "Please enter a valid date.",
+    err_country_birth: "Please select your country of birth.",
+    err_country_res: "Please select your country of residence.",
+    err_email: "Please enter a valid e-mail address.",
+    err_phone: "Please enter a valid phone number.",
+    err_affiliation: "Please enter your affiliation code.",
+    err_photo: "A profile photograph is required.",
+    select_placeholder: "Select…", select_country: "Select country…",
+    gender_female: "Female", gender_male: "Male",
+    photo_label_upload: "Upload a photograph",
+    photo_label_ready: "Photograph ready",
+    photo_size_ready: "{size} KB · 500×626 JPEG · cropped",
+    photo_recrop: "Re-crop",
+    disclaimer: "By submitting you authorise WBF and EBL to store the data above in their shared player database.",
+    btn_submit: "Submit registration", btn_submitting: "Submitting…",
+    btn_submit_another: "Submit another",
+    success_title: "Registration received",
+    success_text: "Your profile has been added to the WBF · EBL shared database. A confirmation will be sent to the e-mail address provided.",
+    ref_label: "Reference",
+    cropper_title: "Adjust your photograph",
+    cropper_subtitle: "Drag to position your face inside the frame.",
+    cropper_help: "Centre your face within the grid · output 500×626 px",
+    btn_cancel: "Cancel", btn_apply: "Apply",
+    err_timeout: "Request timed out. Please check your connection and try again.",
+    err_generic: "Submission failed. Please try again.",
+    err_photo_large: "The photograph must be 4 MB or smaller.",
+    err_source_large: "Source image too large (max 15 MB).",
+    err_image_load: "Could not load that image.",
+  },
+
+  fr: {
+    brand_sub: "Inscription joueur",
+    secure_form: "Formulaire sécurisé",
+    intro_title: '<span class="accent">Inscription</span> joueur.',
+    intro_text: "Ajoutez votre profil à la base de données partagée de la World Bridge Federation et de la European Bridge League. Les champs de nom n'acceptent que des lettres latines — sans accents.",
+    sec1_title: "Identité", sec2_title: "Origine et contact", sec3_title: "Affiliation et photographie",
+    label_family: "Nom de famille", label_given: "Prénom", label_gender: "Sexe", label_dob: "Date de naissance",
+    label_country_birth: "Pays de naissance", label_country_res: "Pays de résidence",
+    label_email: "E-mail", label_phone: "Téléphone", label_affiliation: "Code d'affiliation nationale",
+    label_chinese_name: "Nom chinois", label_photo: "Photographie de profil",
+    placeholder_family: "Dupont", placeholder_given: "Pierre",
+    hint_latin: "Lettres latines uniquement · sans accents.",
+    hint_phone: "Indicatif pays inclus.",
+    hint_affiliation: "Code de votre fédération ou numéro de membre.",
+    hint_chinese_name: "Facultatif · caractères chinois acceptés.",
+    photo_hint_default: "JPG, PNG ou WEBP · Un outil de recadrage s'ouvrira après la sélection",
+    err_latin: "Utilisez uniquement des lettres latines (A–Z), sans accents.",
+    err_latin_specific: '« {ch} » n\'est pas autorisé — lettres latines uniquement, sans accents.',
+    err_gender: "Veuillez sélectionner un sexe.", err_dob: "Veuillez entrer une date valide.",
+    err_country_birth: "Veuillez sélectionner votre pays de naissance.",
+    err_country_res: "Veuillez sélectionner votre pays de résidence.",
+    err_email: "Veuillez entrer une adresse e-mail valide.",
+    err_phone: "Veuillez entrer un numéro de téléphone valide.",
+    err_affiliation: "Veuillez entrer votre code d'affiliation.",
+    err_photo: "Une photographie de profil est requise.",
+    select_placeholder: "Sélectionner…", select_country: "Sélectionner un pays…",
+    gender_female: "Femme", gender_male: "Homme",
+    photo_label_upload: "Téléverser une photographie",
+    photo_label_ready: "Photographie prête",
+    photo_size_ready: "{size} Ko · 500×626 JPEG · recadrée",
+    photo_recrop: "Recadrer",
+    disclaimer: "En soumettant ce formulaire, vous autorisez la WBF et l'EBL à stocker les données ci-dessus dans leur base de données partagée.",
+    btn_submit: "Envoyer l'inscription", btn_submitting: "Envoi…",
+    btn_submit_another: "Inscrire un autre joueur",
+    success_title: "Inscription reçue",
+    success_text: "Votre profil a été ajouté à la base de données partagée WBF · EBL. Une confirmation sera envoyée à l'adresse e-mail fournie.",
+    ref_label: "Référence",
+    cropper_title: "Ajustez votre photographie",
+    cropper_subtitle: "Déplacez pour positionner votre visage dans le cadre.",
+    cropper_help: "Centrez votre visage dans la grille · sortie 500×626 px",
+    btn_cancel: "Annuler", btn_apply: "Appliquer",
+    err_timeout: "Délai d'attente dépassé. Vérifiez votre connexion et réessayez.",
+    err_generic: "L'envoi a échoué. Veuillez réessayer.",
+    err_photo_large: "La photographie ne doit pas dépasser 4 Mo.",
+    err_source_large: "Image source trop volumineuse (max 15 Mo).",
+    err_image_load: "Impossible de charger cette image.",
+  },
+
+  es: {
+    brand_sub: "Inscripción de jugador",
+    secure_form: "Formulario seguro",
+    intro_title: '<span class="accent">Inscripción</span> de jugador.',
+    intro_text: "Añade tu perfil a la base de datos compartida de jugadores de la World Bridge Federation y la European Bridge League. Los campos de nombre solo aceptan letras latinas — sin acentos.",
+    sec1_title: "Identidad", sec2_title: "Origen y contacto", sec3_title: "Afiliación y fotografía",
+    label_family: "Apellido", label_given: "Nombre", label_gender: "Sexo", label_dob: "Fecha de nacimiento",
+    label_country_birth: "País de nacimiento", label_country_res: "País de residencia",
+    label_email: "Correo electrónico", label_phone: "Teléfono", label_affiliation: "Código de afiliación nacional",
+    label_chinese_name: "Nombre chino", label_photo: "Fotografía de perfil",
+    placeholder_family: "García", placeholder_given: "Juan",
+    hint_latin: "Solo letras latinas · sin acentos.",
+    hint_phone: "Incluye el código de país.",
+    hint_affiliation: "Código de federación o número de membresía.",
+    hint_chinese_name: "Opcional · se aceptan caracteres chinos.",
+    photo_hint_default: "JPG, PNG o WEBP · Se abrirá una herramienta de recorte tras la selección",
+    err_latin: "Usa solo letras latinas básicas (A–Z), sin acentos.",
+    err_latin_specific: '«{ch}» no está permitido — solo letras latinas, sin acentos.',
+    err_gender: "Selecciona un sexo.", err_dob: "Introduce una fecha válida.",
+    err_country_birth: "Selecciona tu país de nacimiento.",
+    err_country_res: "Selecciona tu país de residencia.",
+    err_email: "Introduce un correo electrónico válido.",
+    err_phone: "Introduce un número de teléfono válido.",
+    err_affiliation: "Introduce tu código de afiliación.",
+    err_photo: "Se requiere una fotografía de perfil.",
+    select_placeholder: "Seleccionar…", select_country: "Seleccionar país…",
+    gender_female: "Mujer", gender_male: "Hombre",
+    photo_label_upload: "Subir una fotografía",
+    photo_label_ready: "Fotografía lista",
+    photo_size_ready: "{size} KB · 500×626 JPEG · recortada",
+    photo_recrop: "Recortar de nuevo",
+    disclaimer: "Al enviar, autorizas a la WBF y la EBL a almacenar los datos anteriores en su base de datos compartida de jugadores.",
+    btn_submit: "Enviar inscripción", btn_submitting: "Enviando…",
+    btn_submit_another: "Inscribir otro",
+    success_title: "Inscripción recibida",
+    success_text: "Tu perfil se ha añadido a la base de datos compartida WBF · EBL. Se enviará una confirmación al correo electrónico proporcionado.",
+    ref_label: "Referencia",
+    cropper_title: "Ajustar tu fotografía",
+    cropper_subtitle: "Arrastra para colocar tu cara dentro del marco.",
+    cropper_help: "Centra tu cara en la cuadrícula · salida 500×626 px",
+    btn_cancel: "Cancelar", btn_apply: "Aplicar",
+    err_timeout: "Tiempo agotado. Comprueba tu conexión e inténtalo de nuevo.",
+    err_generic: "Error al enviar. Por favor inténtalo de nuevo.",
+    err_photo_large: "La fotografía debe ser de 4 MB o menos.",
+    err_source_large: "Imagen origen demasiado grande (máx 15 MB).",
+    err_image_load: "No se pudo cargar la imagen.",
+  },
+
+  de: {
+    brand_sub: "Spielerregistrierung",
+    secure_form: "Sicheres Formular",
+    intro_title: 'Spieler-<span class="accent">Registrierung</span>.',
+    intro_text: "Fügen Sie Ihr Profil zur gemeinsamen Spielerdatenbank der World Bridge Federation und der European Bridge League hinzu. Namensfelder akzeptieren nur lateinische Buchstaben — ohne Akzente.",
+    sec1_title: "Identität", sec2_title: "Herkunft und Kontakt", sec3_title: "Verband und Foto",
+    label_family: "Familienname", label_given: "Vorname", label_gender: "Geschlecht", label_dob: "Geburtsdatum",
+    label_country_birth: "Geburtsland", label_country_res: "Wohnsitzland",
+    label_email: "E-Mail", label_phone: "Telefon", label_affiliation: "Nationaler Verbandscode",
+    label_chinese_name: "Chinesischer Name", label_photo: "Profilfoto",
+    placeholder_family: "Schmidt", placeholder_given: "Hans",
+    hint_latin: "Nur lateinische Buchstaben · keine Akzente.",
+    hint_phone: "Inkl. Ländervorwahl.",
+    hint_affiliation: "Verbandscode oder Mitgliedsnummer.",
+    hint_chinese_name: "Optional · chinesische Schriftzeichen akzeptiert.",
+    photo_hint_default: "JPG, PNG oder WEBP · Nach der Auswahl öffnet sich ein Zuschneide-Werkzeug",
+    err_latin: "Verwenden Sie nur lateinische Grundbuchstaben (A–Z), keine Akzente.",
+    err_latin_specific: '„{ch}" ist nicht erlaubt — nur lateinische Buchstaben, keine Akzente.',
+    err_gender: "Bitte wählen Sie ein Geschlecht.", err_dob: "Bitte geben Sie ein gültiges Datum ein.",
+    err_country_birth: "Bitte wählen Sie Ihr Geburtsland.",
+    err_country_res: "Bitte wählen Sie Ihr Wohnsitzland.",
+    err_email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
+    err_phone: "Bitte geben Sie eine gültige Telefonnummer ein.",
+    err_affiliation: "Bitte geben Sie Ihren Verbandscode ein.",
+    err_photo: "Ein Profilfoto ist erforderlich.",
+    select_placeholder: "Auswählen…", select_country: "Land auswählen…",
+    gender_female: "Weiblich", gender_male: "Männlich",
+    photo_label_upload: "Foto hochladen",
+    photo_label_ready: "Foto bereit",
+    photo_size_ready: "{size} KB · 500×626 JPEG · zugeschnitten",
+    photo_recrop: "Neu zuschneiden",
+    disclaimer: "Mit der Übermittlung erlauben Sie der WBF und der EBL, die oben genannten Daten in ihrer gemeinsamen Spielerdatenbank zu speichern.",
+    btn_submit: "Registrierung absenden", btn_submitting: "Senden…",
+    btn_submit_another: "Weitere Registrierung",
+    success_title: "Registrierung empfangen",
+    success_text: "Ihr Profil wurde zur gemeinsamen WBF · EBL-Datenbank hinzugefügt. Eine Bestätigung wird an die angegebene E-Mail-Adresse gesendet.",
+    ref_label: "Referenz",
+    cropper_title: "Foto anpassen",
+    cropper_subtitle: "Ziehen Sie, um Ihr Gesicht im Rahmen zu positionieren.",
+    cropper_help: "Gesicht im Raster zentrieren · Ausgabe 500×626 px",
+    btn_cancel: "Abbrechen", btn_apply: "Anwenden",
+    err_timeout: "Zeitüberschreitung. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    err_generic: "Übermittlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+    err_photo_large: "Das Foto darf maximal 4 MB groß sein.",
+    err_source_large: "Quellbild zu groß (max 15 MB).",
+    err_image_load: "Das Bild konnte nicht geladen werden.",
+  },
+
+  pl: {
+    brand_sub: "Rejestracja zawodnika",
+    secure_form: "Bezpieczny formularz",
+    intro_title: '<span class="accent">Rejestracja</span> zawodnika.',
+    intro_text: "Dodaj swój profil do wspólnej bazy danych zawodników Światowej Federacji Brydża i Europejskiej Ligi Brydża. Pola imion akceptują tylko litery łacińskie — bez znaków diakrytycznych.",
+    sec1_title: "Tożsamość", sec2_title: "Pochodzenie i kontakt", sec3_title: "Przynależność i zdjęcie",
+    label_family: "Nazwisko", label_given: "Imię", label_gender: "Płeć", label_dob: "Data urodzenia",
+    label_country_birth: "Kraj urodzenia", label_country_res: "Kraj zamieszkania",
+    label_email: "E-mail", label_phone: "Telefon", label_affiliation: "Krajowy kod członkowski",
+    label_chinese_name: "Imię chińskie", label_photo: "Zdjęcie profilowe",
+    placeholder_family: "Kowalski", placeholder_given: "Jan",
+    hint_latin: "Tylko litery łacińskie · bez znaków diakrytycznych.",
+    hint_phone: "Dołącz kod kraju.",
+    hint_affiliation: "Kod federacji lub numer członkowski.",
+    hint_chinese_name: "Opcjonalnie · znaki chińskie akceptowane.",
+    photo_hint_default: "JPG, PNG lub WEBP · Narzędzie kadrowania otworzy się po wybraniu",
+    err_latin: "Używaj tylko podstawowych liter łacińskich (A–Z), bez znaków diakrytycznych.",
+    err_latin_specific: '„{ch}" nie jest dozwolone — tylko litery łacińskie, bez znaków diakrytycznych.',
+    err_gender: "Wybierz płeć.", err_dob: "Podaj prawidłową datę.",
+    err_country_birth: "Wybierz kraj urodzenia.",
+    err_country_res: "Wybierz kraj zamieszkania.",
+    err_email: "Podaj prawidłowy adres e-mail.",
+    err_phone: "Podaj prawidłowy numer telefonu.",
+    err_affiliation: "Podaj kod członkowski.",
+    err_photo: "Wymagane jest zdjęcie profilowe.",
+    select_placeholder: "Wybierz…", select_country: "Wybierz kraj…",
+    gender_female: "Kobieta", gender_male: "Mężczyzna",
+    photo_label_upload: "Prześlij zdjęcie",
+    photo_label_ready: "Zdjęcie gotowe",
+    photo_size_ready: "{size} KB · 500×626 JPEG · przycięte",
+    photo_recrop: "Przytnij ponownie",
+    disclaimer: "Wysyłając formularz, upoważniasz WBF i EBL do przechowywania powyższych danych we wspólnej bazie zawodników.",
+    btn_submit: "Wyślij rejestrację", btn_submitting: "Wysyłanie…",
+    btn_submit_another: "Zarejestruj kolejnego",
+    success_title: "Rejestracja przyjęta",
+    success_text: "Twój profil został dodany do wspólnej bazy WBF · EBL. Potwierdzenie zostanie wysłane na podany adres e-mail.",
+    ref_label: "Numer referencyjny",
+    cropper_title: "Dostosuj zdjęcie",
+    cropper_subtitle: "Przeciągnij, aby ustawić twarz w ramce.",
+    cropper_help: "Wyśrodkuj twarz w siatce · wyjście 500×626 px",
+    btn_cancel: "Anuluj", btn_apply: "Zastosuj",
+    err_timeout: "Upłynął limit czasu. Sprawdź połączenie i spróbuj ponownie.",
+    err_generic: "Wysłanie nie powiodło się. Spróbuj ponownie.",
+    err_photo_large: "Zdjęcie nie może przekraczać 4 MB.",
+    err_source_large: "Plik źródłowy zbyt duży (maks 15 MB).",
+    err_image_load: "Nie można załadować obrazu.",
+  },
+
+  zh: {
+    brand_sub: "球员注册",
+    secure_form: "安全表单",
+    intro_title: '球员<span class="accent">注册</span>。',
+    intro_text: "将您的资料添加到世界桥牌联合会和欧洲桥牌联盟共享球员数据库。姓名字段仅接受拉丁字母 — 不含重音符号。",
+    sec1_title: "身份信息", sec2_title: "出生地与联系方式", sec3_title: "协会与照片",
+    label_family: "姓", label_given: "名", label_gender: "性别", label_dob: "出生日期",
+    label_country_birth: "出生国家", label_country_res: "居住国家",
+    label_email: "电子邮箱", label_phone: "电话", label_affiliation: "国家协会代码",
+    label_chinese_name: "中文姓名", label_photo: "个人照片",
+    placeholder_family: "Wang", placeholder_given: "Ming",
+    hint_latin: "仅限拉丁字母 · 不含重音符号。",
+    hint_phone: "请包含国家代码。",
+    hint_affiliation: "您的协会代码或会员编号。",
+    hint_chinese_name: "可选 · 接受中文字符。",
+    photo_hint_default: "JPG、PNG 或 WEBP · 选择后将打开裁剪工具",
+    err_latin: "请只使用基本拉丁字母（A–Z），不含重音符号。",
+    err_latin_specific: '不允许"{ch}" — 仅限拉丁字母，不含重音符号。',
+    err_gender: "请选择性别。", err_dob: "请输入有效的日期。",
+    err_country_birth: "请选择出生国家。",
+    err_country_res: "请选择居住国家。",
+    err_email: "请输入有效的电子邮箱地址。",
+    err_phone: "请输入有效的电话号码。",
+    err_affiliation: "请输入您的协会代码。",
+    err_photo: "需要提交个人照片。",
+    select_placeholder: "选择…", select_country: "选择国家…",
+    gender_female: "女", gender_male: "男",
+    photo_label_upload: "上传照片",
+    photo_label_ready: "照片已就绪",
+    photo_size_ready: "{size} KB · 500×626 JPEG · 已裁剪",
+    photo_recrop: "重新裁剪",
+    disclaimer: "提交即表示您授权 WBF 和 EBL 将上述数据存储在其共享球员数据库中。",
+    btn_submit: "提交注册", btn_submitting: "提交中…",
+    btn_submit_another: "再注册一位球员",
+    success_title: "注册已收到",
+    success_text: "您的资料已添加到 WBF · EBL 共享数据库。确认信息将发送至您提供的电子邮箱。",
+    ref_label: "参考编号",
+    cropper_title: "调整您的照片",
+    cropper_subtitle: "拖动以将您的面部置于框内。",
+    cropper_help: "将面部居中于网格内 · 输出 500×626 px",
+    btn_cancel: "取消", btn_apply: "应用",
+    err_timeout: "请求超时。请检查您的网络连接后重试。",
+    err_generic: "提交失败。请重试。",
+    err_photo_large: "照片必须小于 4 MB。",
+    err_source_large: "源图像太大（最大 15 MB）。",
+    err_image_load: "无法加载该图像。",
+  },
+};
+
+const t = (key, vars) => {
+  let s = (I18N[CURRENT_LANG] && I18N[CURRENT_LANG][key]) || I18N.en[key] || key;
+  if (vars) for (const k in vars) s = s.replace('{'+k+'}', vars[k]);
+  return s;
+};
+
+/* === Detect initial language === */
+let CURRENT_LANG = localStorage.getItem('wbf_lang')
+  || (navigator.language || 'en').slice(0,2).toLowerCase();
+if (!I18N[CURRENT_LANG]) CURRENT_LANG = 'en';
+
+function applyLanguage(lang){
+  if (!I18N[lang]) lang = 'en';
+  CURRENT_LANG = lang;
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.dataset.i18nHtml;
+    if (I18N[lang][key]) el.innerHTML = I18N[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.dataset.i18nPlaceholder;
+    if (I18N[lang][key]) el.placeholder = I18N[lang][key];
+  });
+
+  /* Refresh country dropdowns with localized placeholder */
+  buildCountryDropdowns();
+
+  /* Update active button */
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  /* Refresh dynamic photo label/size if photo state changed */
+  refreshPhotoStateLabel();
+
+  localStorage.setItem('wbf_lang', lang);
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyLanguage(btn.dataset.lang));
+});
+
+/* =========================================================
+   COUNTRIES (rebuilds when language changes)
+========================================================= */
+const COUNTRIES = [
+  "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+  "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia",
+  "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon",
+  "Canada","Cape Verde","Chad","Chile","China","Colombia","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic",
+  "Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Ethiopia","Faroe Islands","Fiji","Finland",
+  "France","Gabon","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guyana","Haiti","Honduras","Hong Kong",
+  "Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan",
+  "Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Liberia","Libya","Liechtenstein","Lithuania",
+  "Luxembourg","Macau","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritius","Mexico","Moldova",
+  "Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Zealand",
+  "Nicaragua","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palestine","Panama","Paraguay","Peru",
+  "Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","San Marino","Saudi Arabia","Senegal",
+  "Serbia","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden",
+  "Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Trinidad and Tobago","Tunisia","Turkey",
+  "Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+  "Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+];
+
+function buildCountryDropdowns(){
+  const placeholder = t('select_country');
+  ['countryBirth','countryResidence'].forEach(id => {
+    const sel = document.getElementById(id);
+    const current = sel.value;
+    sel.innerHTML = `<option value="">${placeholder}</option>` +
+      COUNTRIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+    if (current) sel.value = current;
+  });
+}
+
+/* =========================================================
+   STRICT LATIN — no accents, with visible error feedback
+========================================================= */
+const LATIN_RE = /^[A-Za-z\s'\-\.]+$/;
+const LATIN_CHAR_RE = /[A-Za-z\s'\-\.]/;
+const latinClearTimers = {};
+let latinJustStripped = {};  /* per-field flag preventing validateField from clearing the error */
+
+['familyName','givenName'].forEach(id => {
+  const input = document.getElementById(id);
+  const wrap  = input.closest('.field');
+  const errEl = wrap.querySelector('.err');
+
+  input.addEventListener('input', e => {
+    const v = e.target.value;
+    const stripped = Array.from(v).filter(ch => !LATIN_CHAR_RE.test(ch));
+
+    if (stripped.length > 0){
+      /* Remove bad characters, keep cursor position */
+      const cleaned = Array.from(v).filter(ch => LATIN_CHAR_RE.test(ch)).join('');
+      const pos = e.target.selectionStart - (v.length - cleaned.length);
+      e.target.value = cleaned;
+      try { e.target.setSelectionRange(pos, pos); } catch(_) {}
+
+      /* Show specific error naming the rejected character */
+      errEl.textContent = t('err_latin_specific', { ch: stripped[0] });
+      wrap.classList.add('invalid');
+      latinJustStripped[id] = true;
+
+      clearTimeout(latinClearTimers[id]);
+      latinClearTimers[id] = setTimeout(() => {
+        latinJustStripped[id] = false;
+        errEl.textContent = t('err_latin');
+        if (LATIN_RE.test(e.target.value) || !e.target.value){
+          wrap.classList.remove('invalid');
+        }
+      }, 2500);
+    }
+  });
+});
+
+/* =========================================================
+   PHOTO + CROPPER
+========================================================= */
+const photoInput   = document.getElementById('photo');
+const photoUp      = document.getElementById('photoUp');
+const photoPreview = document.getElementById('photoPreview');
+const photoLabel   = document.getElementById('photoLabel');
+const photoSize    = document.getElementById('photoSize');
+
+const overlay   = document.getElementById('cropperOverlay');
+const canvas    = document.getElementById('cropperCanvas');
+const ctx       = canvas.getContext('2d');
+const zoomInput = document.getElementById('cropperZoom');
+const cancelBtn = document.getElementById('cropperCancel');
+const applyBtn  = document.getElementById('cropperApply');
+
+const CROP_DISPLAY_W = 250, CROP_DISPLAY_H = 313;
+const CROP_OUTPUT_W  = 500, CROP_OUTPUT_H  = 626;
+const MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
+
+let croppedBlob = null;
+let lastSourceFile = null;
+let lastCroppedSize = 0;
+let state = {
+  img:null, baseScale:1, zoom:1, x:0, y:0,
+  dragging:false, dragStartX:0, dragStartY:0, origX:0, origY:0,
+  pinchStartDist:0, pinchStartZoom:1,
+};
+
+function refreshPhotoStateLabel(){
+  if (croppedBlob){
+    photoLabel.textContent = t('photo_label_ready');
+    photoSize.textContent = t('photo_size_ready', { size: lastCroppedSize });
+  } else {
+    photoLabel.textContent = t('photo_label_upload');
+    photoSize.textContent = t('photo_hint_default');
+  }
+}
+
+photoInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024){
+    alert(t('err_source_large'));
+    photoInput.value = '';
+    return;
+  }
+  lastSourceFile = file;
+  openCropper(file);
+});
+
+photoUp.addEventListener('click', e => {
+  if (photoUp.classList.contains('has-photo') && e.target.id === 'photoEdit' && lastSourceFile){
+    e.preventDefault();
+    openCropper(lastSourceFile);
+  }
+});
+
+function openCropper(file){
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    state.img = img;
+    state.baseScale = Math.max(CROP_DISPLAY_W / img.naturalWidth, CROP_DISPLAY_H / img.naturalHeight);
+    state.zoom = 1; state.x = 0; state.y = 0;
+    zoomInput.value = '1';
+    draw();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    alert(t('err_image_load'));
+    photoInput.value = '';
+  };
+  img.src = url;
+}
+
+function closeCropper(){
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  state.img = null;
+}
+
+function draw(){
+  const { img, baseScale, zoom, x, y } = state;
+  if (!img) return;
+  const dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== CROP_DISPLAY_W * dpr){
+    canvas.width  = CROP_DISPLAY_W * dpr;
+    canvas.height = CROP_DISPLAY_H * dpr;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, CROP_DISPLAY_W, CROP_DISPLAY_H);
+
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const dx = (CROP_DISPLAY_W - w) / 2 + x;
+  const dy = (CROP_DISPLAY_H - h) / 2 + y;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, dx, dy, w, h);
+}
+
+function constrain(){
+  const { img, baseScale, zoom } = state;
+  if (!img) return;
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const maxX = Math.max(0, (w - CROP_DISPLAY_W) / 2);
+  const maxY = Math.max(0, (h - CROP_DISPLAY_H) / 2);
+  state.x = Math.max(-maxX, Math.min(maxX, state.x));
+  state.y = Math.max(-maxY, Math.min(maxY, state.y));
+}
+
+canvas.addEventListener('mousedown', e => {
+  state.dragging = true;
+  state.dragStartX = e.clientX; state.dragStartY = e.clientY;
+  state.origX = state.x; state.origY = state.y;
+});
+window.addEventListener('mousemove', e => {
+  if (!state.dragging) return;
+  state.x = state.origX + (e.clientX - state.dragStartX);
+  state.y = state.origY + (e.clientY - state.dragStartY);
+  constrain(); draw();
+});
+window.addEventListener('mouseup', () => { state.dragging = false; });
+
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  state.zoom = Math.max(1, Math.min(4, state.zoom - e.deltaY * 0.002));
+  zoomInput.value = state.zoom;
+  constrain(); draw();
+}, { passive: false });
+
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1){
+    state.dragging = true;
+    state.dragStartX = e.touches[0].clientX;
+    state.dragStartY = e.touches[0].clientY;
+    state.origX = state.x; state.origY = state.y;
+  } else if (e.touches.length === 2){
+    state.dragging = false;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    state.pinchStartDist = Math.hypot(dx, dy);
+    state.pinchStartZoom = state.zoom;
+  }
+}, { passive: true });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && state.dragging){
+    state.x = state.origX + (e.touches[0].clientX - state.dragStartX);
+    state.y = state.origY + (e.touches[0].clientY - state.dragStartY);
+  } else if (e.touches.length === 2){
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    state.zoom = Math.max(1, Math.min(4, state.pinchStartZoom * (dist / state.pinchStartDist)));
+    zoomInput.value = state.zoom;
+  }
+  constrain(); draw();
+}, { passive: false });
+
+canvas.addEventListener('touchend', () => { state.dragging = false; });
+
+zoomInput.addEventListener('input', e => {
+  state.zoom = parseFloat(e.target.value);
+  constrain(); draw();
+});
+
+cancelBtn.addEventListener('click', () => {
+  closeCropper();
+  if (!croppedBlob){
+    photoInput.value = '';
+    lastSourceFile = null;
+  }
+});
+overlay.addEventListener('click', e => { if (e.target === overlay) cancelBtn.click(); });
+
+applyBtn.addEventListener('click', async () => {
+  const { img, baseScale, zoom, x, y } = state;
+  if (!img) return;
+  const out = document.createElement('canvas');
+  out.width = CROP_OUTPUT_W; out.height = CROP_OUTPUT_H;
+  const octx = out.getContext('2d');
+  octx.imageSmoothingQuality = 'high';
+
+  const outScale = CROP_OUTPUT_W / CROP_DISPLAY_W;
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const dx = (CROP_DISPLAY_W - w) / 2 + x;
+  const dy = (CROP_DISPLAY_H - h) / 2 + y;
+  octx.drawImage(img, dx * outScale, dy * outScale, w * outScale, h * outScale);
+
+  out.toBlob(blob => {
+    if (!blob){ alert(t('err_generic')); return; }
+    if (blob.size > MAX_OUTPUT_BYTES){
+      alert(t('err_photo_large'));
+      return;
+    }
+    croppedBlob = blob;
+    lastCroppedSize = (blob.size/1024).toFixed(0);
+    showCroppedPreview(blob);
+    closeCropper();
+  }, 'image/jpeg', 0.92);
+});
+
+function showCroppedPreview(blob){
+  const url = URL.createObjectURL(blob);
+  photoPreview.style.backgroundImage = `url(${url})`;
+  photoPreview.textContent = '';
+  refreshPhotoStateLabel();
+  photoUp.classList.add('has-photo');
+  photoUp.closest('.field')?.classList.remove('invalid');
+}
+
+/* =========================================================
+   VALIDATION (per-field, blur + revalidate-on-input when invalid)
+========================================================= */
+function validateField(field){
+  const wrap = field.closest('.field');
+  const errEl = wrap.querySelector('.err');
+  let valid = true;
+  const val = (field.value || '').trim();
+
+  if (field.required && !val) valid = false;
+  if (field.type === 'email' && val) valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+  if (field.type === 'tel' && val) valid = /^[+\d][\d\s().\-]{5,}$/.test(val);
+  if ((field.id === 'familyName' || field.id === 'givenName') && val) valid = LATIN_RE.test(val);
+  if (field.id === 'photo') valid = croppedBlob !== null;
+
+  /* When the strict-latin handler has just stripped a char, don't override its specific error */
+  if (!valid || !latinJustStripped[field.id]){
+    if (errEl && !latinJustStripped[field.id]){
+      /* Restore the i18n default message */
+      const key = errEl.dataset.i18n;
+      if (key && I18N[CURRENT_LANG][key]) errEl.textContent = I18N[CURRENT_LANG][key];
+    }
+    wrap.classList.toggle('invalid', !valid);
+  }
+  return valid;
+}
+
+document.querySelectorAll('#registrationForm input, #registrationForm select').forEach(field => {
+  field.addEventListener('blur', () => validateField(field));
+  field.addEventListener('change', () => {
+    if (field.closest('.field').classList.contains('invalid')) validateField(field);
+  });
+  /* For name fields, skip auto-revalidation on every keystroke
+     so the strict-latin warning stays visible */
+  if (field.id !== 'familyName' && field.id !== 'givenName'){
+    field.addEventListener('input', () => {
+      if (field.closest('.field').classList.contains('invalid')) validateField(field);
+    });
+  }
+});
+
+document.getElementById('dateOfBirth').max = new Date().toISOString().split('T')[0];
+
+/* =========================================================
+   SUBMIT — with 60s timeout + clear error reporting
+========================================================= */
+const form        = document.getElementById('registrationForm');
+const submitBtn   = document.getElementById('submitBtn');
+const submitText  = document.getElementById('submitText');
+const submitIcon  = document.getElementById('submitIcon');
+const errorBanner = document.getElementById('errorBanner');
+
+function setSubmitting(on){
+  submitBtn.disabled = on;
+  submitText.textContent = on ? t('btn_submitting') : t('btn_submit');
+  submitIcon.innerHTML = on
+    ? '<span class="spinner"></span>'
+    : '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+}
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  errorBanner.classList.remove('active');
+
+  let allValid = true;
+  form.querySelectorAll('input[required], select[required]').forEach(f => {
+    if (!validateField(f)) allValid = false;
+  });
+  if (!allValid){
+    form.querySelector('.field.invalid')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  setSubmitting(true);
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 60000);
+
+  try {
+    const formData = new FormData();
+    ['familyName','givenName','gender','countryBirth','countryResidence',
+     'dateOfBirth','email','phone','affiliationCode','chineseName'].forEach(k => {
+      formData.append(k, document.getElementById(k).value.trim());
+    });
+    const lastName  = document.getElementById('familyName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
+    const firstName = document.getElementById('givenName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
+    formData.append('photo', croppedBlob, `${lastName}_${firstName}.jpg`);
+
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
+
+    if (!res.ok){
+      let msg = t('err_generic');
+      try { const j = await res.json(); if (j.error) msg = j.error; }
+      catch(_){ msg = `${t('err_generic')} (HTTP ${res.status})`; }
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    document.getElementById('refId').textContent = 'WBF-' + String(data.id).padStart(6,'0');
+    showSuccess();
+  } catch (err){
+    clearTimeout(timeoutId);
+    console.error('[register] error:', err);
+    let msg = err.message;
+    if (err.name === 'AbortError') msg = t('err_timeout');
+    if (!msg) msg = t('err_generic');
+    errorBanner.textContent = msg;
+    errorBanner.classList.add('active');
+    setSubmitting(false);
+  }
+});
+
+function showSuccess(){
+  document.getElementById('registrationForm').style.display = 'none';
+  document.getElementById('successPanel').classList.add('active');
+  window.scrollTo({top: document.getElementById('formMain').offsetTop - 40, behavior:'smooth'});
+}
+
+function resetForm(){
+  document.getElementById('registrationForm').reset();
+  document.getElementById('registrationForm').style.display = '';
+  document.getElementById('successPanel').classList.remove('active');
+  errorBanner.classList.remove('active');
+  photoPreview.style.backgroundImage = '';
+  photoPreview.textContent = '+';
+  photoUp.classList.remove('has-photo');
+  croppedBlob = null; lastSourceFile = null; lastCroppedSize = 0;
+  refreshPhotoStateLabel();
+  setSubmitting(false);
+  document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* === Boot === */
+buildCountryDropdowns();
+applyLanguage(CURRENT_LANG);
+</script>
+</body>
+</html>

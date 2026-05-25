@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>WBF · EBL — Admin</title>
+<style>
+:root{
+  --bg:#fafaf9;
+  --surface:#ffffff;
+  --ink:#0a0a0a;
+  --ink-2:#3f3f46;
+  --ink-3:#71717a;
+  --ink-4:#a1a1aa;
+  --line:#e7e5e4;
+  --line-2:#f5f5f4;
+  --green-900:#0f3d2e;
+  --green-800:#14532d;
+  --green-700:#166534;
+  --green-600:#15803d;
+  --green-50:#f0fdf4;
+  --error:#b91c1c;
+  --error-bg:#fef2f2;
+  --radius:10px;
+  --radius-sm:6px;
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Helvetica Neue',
+        'PingFang SC','Hiragino Sans GB','Microsoft YaHei',Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Menlo','Consolas',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:15.5px;
+     line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+/* === Gate === */
+.gate{
+  min-height:100vh;display:grid;place-items:center;padding:1.5rem;
+}
+.gate-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:14px;padding:2rem;box-shadow:var(--shadow-sm);
+  width:100%;max-width:380px;
+}
+.gate-brand{
+  display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;
+}
+.gate-logo{
+  height:36px;width:auto;display:block;
+  object-fit:contain;flex-shrink:0;
+}
+.gate-mark{
+  width:32px;height:32px;background:var(--green-800);color:#fff;
+  border-radius:8px;display:grid;place-items:center;font-weight:700;font-size:.9rem;
+}
+.gate-brand strong{font-size:.95rem;font-weight:600;letter-spacing:-.005em}
+.gate-brand small{font-size:.75rem;color:var(--ink-3);display:block;margin-top:1px}
+.gate h1{
+  font-size:1.5rem;font-weight:700;letter-spacing:-.015em;margin-bottom:.45rem;
+}
+.gate p{color:var(--ink-3);font-size:.92rem;margin-bottom:1.5rem}
+.gate label{
+  display:block;font-size:.82rem;font-weight:500;color:var(--ink-2);
+  margin-bottom:.4rem;
+}
+.gate input{
+  width:100%;font-family:var(--font);font-size:1rem;
+  padding:.75rem .85rem;background:var(--surface);
+  border:1px solid var(--line);border-radius:var(--radius);
+  color:var(--ink);outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.gate input:focus{border-color:var(--green-700);box-shadow:0 0 0 3px rgba(22,101,52,.12)}
+.gate-err{
+  font-size:.85rem;color:var(--error);margin-top:.5rem;display:none;
+}
+.gate-err.active{display:block}
+
+/* === Header === */
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--line);
+  padding:.85rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  position:sticky;top:0;z-index:10;
+}
+.brand{display:flex;align-items:center;gap:.7rem}
+.brand-logo{
+  height:34px;width:auto;display:block;
+  object-fit:contain;flex-shrink:0;
+}
+.brand-mark{
+  width:30px;height:30px;background:var(--green-800);color:#fff;
+  border-radius:7px;display:grid;place-items:center;font-weight:700;font-size:.85rem;
+}
+.brand-text{
+  display:flex;flex-direction:column;
+  font-weight:600;font-size:.95rem;letter-spacing:-.005em;
+  line-height:1.2;
+}
+.brand-text span{
+  color:var(--ink-3);font-weight:400;font-size:.78rem;
+  margin-left:0;margin-top:1px;
+}
+.counter{
+  font-size:.85rem;color:var(--ink-3);
+  background:var(--green-50);color:var(--green-800);
+  padding:.32rem .75rem;border-radius:99px;font-weight:600;
+}
+
+/* === Toolbar === */
+.toolbar{
+  padding:1rem 1.5rem;
+  display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  border-bottom:1px solid var(--line);background:var(--surface);
+}
+.search{
+  flex:1;min-width:200px;max-width:340px;position:relative;
+}
+.search input{
+  width:100%;font-family:var(--font);font-size:.95rem;
+  padding:.6rem .85rem .6rem 2.1rem;background:var(--bg);
+  border:1px solid var(--line);border-radius:var(--radius-sm);
+  color:var(--ink);outline:none;
+  transition:border-color .15s, box-shadow .15s, background .15s;
+}
+.search input:focus{
+  background:var(--surface);border-color:var(--green-700);
+  box-shadow:0 0 0 3px rgba(22,101,52,.12);
+}
+.search::before{
+  content:'';position:absolute;left:.65rem;top:50%;transform:translateY(-50%);
+  width:13px;height:13px;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717a' stroke-width='2.4' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><path d='m21 21-4.3-4.3'/></svg>") center/contain no-repeat;
+}
+.btn{
+  font-family:var(--font);font-size:.88rem;font-weight:600;
+  padding:.6rem 1.1rem;background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--line);border-radius:var(--radius-sm);cursor:pointer;
+  display:inline-flex;align-items:center;gap:.45rem;
+  transition:background .15s, border-color .15s, color .15s;
+  white-space:nowrap;
+}
+.btn:hover{background:var(--line-2);border-color:#d4d4d8}
+.btn svg{width:13px;height:13px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.btn-primary{
+  background:var(--green-800);color:#fff;border-color:var(--green-800);
+  box-shadow:0 1px 2px rgba(15,61,46,.2);
+}
+.btn-primary:hover{background:var(--green-700);border-color:var(--green-700)}
+
+.toast{
+  position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(100px);
+  background:var(--green-800);color:#fff;
+  padding:.7rem 1.2rem;border-radius:99px;
+  font-size:.92rem;font-weight:500;
+  box-shadow:0 8px 24px rgba(15,61,46,.3);
+  transition:transform .25s cubic-bezier(.16,1,.3,1);
+  z-index:100;display:flex;align-items:center;gap:.5rem;
+}
+.toast.active{transform:translateX(-50%) translateY(0)}
+.toast svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+
+/* === Table === */
+.table-wrap{
+  overflow-x:auto;background:var(--surface);
+  border-top:1px solid var(--line);
+}
+table{
+  width:100%;border-collapse:collapse;
+  font-size:.9rem;
+}
+thead{
+  background:var(--bg);position:sticky;top:0;z-index:5;
+}
+th{
+  text-align:left;padding:.75rem .95rem;
+  font-weight:600;font-size:.78rem;
+  color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.04em;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+td{
+  padding:.75rem .95rem;border-bottom:1px solid var(--line-2);
+  vertical-align:middle;color:var(--ink-2);
+  white-space:nowrap;max-width:280px;
+  overflow:hidden;text-overflow:ellipsis;
+}
+tbody tr:hover{background:var(--green-50)}
+
+/* === Country mismatch highlight === */
+tbody tr.mismatch td:first-child{
+  border-left:3px solid #d97706;
+  padding-left:calc(.9rem - 3px);
+}
+tbody tr.mismatch:hover{background:#fffbeb}
+.badge-mismatch{
+  display:inline-block;
+  font-size:.7rem;font-weight:600;
+  background:#fef3c7;color:#92400e;
+  padding:.12rem .45rem;border-radius:99px;
+  margin-left:.4rem;vertical-align:middle;
+  letter-spacing:.02em;text-transform:uppercase;
+  white-space:nowrap;
+}
+.mismatch-filter{
+  display:inline-flex;align-items:center;gap:.45rem;
+  font-size:.85rem;color:var(--ink-3);
+  user-select:none;cursor:pointer;
+  padding:.45rem .7rem;border-radius:99px;
+  transition:background .15s, color .15s;
+}
+.mismatch-filter:hover{background:var(--line-2);color:var(--ink-2)}
+.mismatch-filter input{margin:0;cursor:pointer;accent-color:#d97706}
+.mismatch-filter.has-results{color:#92400e}
+.mismatch-filter .count{
+  background:#fef3c7;color:#92400e;
+  padding:.05rem .4rem;border-radius:99px;
+  font-weight:600;font-size:.7rem;
+  font-variant-numeric:tabular-nums;
+}
+td.idx{
+  color:var(--ink-4);font-family:var(--mono);font-size:.78rem;
+  font-variant-numeric:tabular-nums;
+}
+td a{color:var(--green-700);text-decoration:none}
+td a:hover{text-decoration:underline}
+.photo-cell{display:flex;align-items:center;gap:.4rem}
+td .thumb{
+  width:26px;height:33px;border-radius:4px;
+  background-size:cover;background-position:center;background-color:var(--line-2);
+  display:inline-block;vertical-align:middle;
+  border:1px solid var(--line);
+}
+.thumb-dl{
+  background:transparent;border:1px solid var(--line);
+  border-radius:6px;width:26px;height:26px;
+  display:grid;place-items:center;cursor:pointer;color:var(--ink-3);
+  transition:background .15s, border-color .15s, color .15s;flex-shrink:0;
+}
+.thumb-dl:hover{background:var(--green-50);border-color:var(--green-700);color:var(--green-700)}
+.thumb-dl:active{transform:translateY(1px)}
+.thumb-dl svg{width:12px;height:12px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.thumb-dl.busy{pointer-events:none;opacity:.6}
+.thumb-dl.busy svg{display:none}
+.thumb-dl.busy::before{
+  content:'';width:11px;height:11px;
+  border:1.5px solid var(--line);border-top-color:var(--green-700);
+  border-radius:50%;animation:spin .7s linear infinite;
+}
+
+.empty{
+  padding:4rem 1.5rem;text-align:center;color:var(--ink-3);
+}
+.empty strong{display:block;color:var(--ink);font-size:1rem;margin-bottom:.4rem;font-weight:600}
+
+.loader{
+  padding:4rem 1.5rem;text-align:center;color:var(--ink-3);font-size:.85rem;
+}
+.spin{
+  display:inline-block;width:14px;height:14px;
+  border:2px solid var(--line);border-top-color:var(--green-700);
+  border-radius:50%;animation:spin .7s linear infinite;
+  vertical-align:middle;margin-right:.5rem;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media (max-width:640px){
+  .topbar{padding:.7rem 1rem}
+  .toolbar{padding:.8rem 1rem}
+  .search{max-width:none}
+  th,td{padding:.55rem .7rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Password gate -->
+<div class="gate" id="gate">
+  <form class="gate-card" id="gateForm">
+    <div class="gate-brand">
+      <img src="https://championships.worldbridge.org/wp-content/uploads/2026/01/WBF-transp@3x.png" alt="WBF" class="gate-logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'gate-mark',textContent:'W'}))">
+      <div>
+        <strong>WBF Admin</strong>
+        <small>Member database access</small>
+      </div>
+    </div>
+    <h1>Sign in</h1>
+    <p>Enter the admin password to view and export registrations.</p>
+    <label for="pwd">Password</label>
+    <input type="password" id="pwd" autofocus autocomplete="current-password">
+    <div class="gate-err" id="gateErr">Incorrect password.</div>
+    <button type="submit" class="btn btn-primary" style="width:100%;margin-top:1.25rem;justify-content:center;padding:.7rem">
+      Sign in
+    </button>
+  </form>
+</div>
+
+<!-- Admin panel -->
+<div id="panel" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <img src="https://championships.worldbridge.org/wp-content/uploads/2026/01/WBF-transp@3x.png" alt="WBF" class="brand-logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'brand-mark',textContent:'W'}))">
+      <div class="brand-text">
+        World Bridge Federation
+        <span>Admin · Member database</span>
+      </div>
+    </div>
+    <span class="counter" id="counter">0 entries</span>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <input type="search" id="search" placeholder="Filter by name, email, country, code…">
+    </div>
+    <label class="mismatch-filter" id="mismatchFilter" title="Show only entries where country of birth differs from residence">
+      <input type="checkbox" id="mismatchToggle">
+      <span>Mismatch only</span>
+      <span class="count" id="mismatchCount">0</span>
+    </label>
+    <button class="btn" id="refreshBtn" title="Refresh">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+      Refresh
+    </button>
+    <button class="btn" id="csvBtn">
+      <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+      Download CSV
+    </button>
+    <button class="btn btn-primary" id="copyBtn">
+      <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copy for Google Sheets
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <table id="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Family name</th>
+          <th>Given name</th>
+          <th>Gender</th>
+          <th>Country of Birth</th>
+          <th>Country of Residence</th>
+          <th>Date of Birth</th>
+          <th>E-mail</th>
+          <th>Phone</th>
+          <th>National affiliation code</th>
+          <th>Photo</th>
+          <th>Chinese name</th>
+          <th>Submitted</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="13" class="loader"><span class="spin"></span>Loading…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+  <span id="toastMsg">Copied to clipboard</span>
+</div>
+
+<script>
+/* === The exact columns and order requested === */
+const COLUMNS = [
+  'Family name','Given name','Gender','Country of Birth','Country of Residence',
+  'Date of Birth','E-mail','Phone','National affiliation code','Photo','Chinese name'
+];
+
+let PASSWORD = sessionStorage.getItem('wbf_pwd') || '';
+let DATA = [];
+let FILTERED = [];
+let SEARCH_QUERY = '';
+let MISMATCH_ONLY = false;
+
+function isMismatch(r){
+  const a = String(r['Country of Birth']     || '').trim();
+  const b = String(r['Country of Residence'] || '').trim();
+  return a && b && a !== b;
+}
+
+function applyFilters(){
+  let out = DATA;
+  if (MISMATCH_ONLY) out = out.filter(isMismatch);
+  if (SEARCH_QUERY){
+    const q = SEARCH_QUERY;
+    out = out.filter(r => COLUMNS.some(c => String(r[c] ?? '').toLowerCase().includes(q)));
+  }
+  FILTERED = out;
+}
+
+const gate = document.getElementById('gate');
+const panel = document.getElementById('panel');
+const gateForm = document.getElementById('gateForm');
+const gateErr = document.getElementById('gateErr');
+const pwdInput = document.getElementById('pwd');
+
+const counter = document.getElementById('counter');
+const tbody = document.getElementById('tbody');
+const search = document.getElementById('search');
+const toast = document.getElementById('toast');
+const toastMsg = document.getElementById('toastMsg');
+
+/* === Auth === */
+gateForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  PASSWORD = pwdInput.value;
+  gateErr.classList.remove('active');
+  const ok = await fetchData();
+  if (ok){
+    sessionStorage.setItem('wbf_pwd', PASSWORD);
+    showPanel();
+  } else {
+    gateErr.classList.add('active');
+    pwdInput.select();
+  }
+});
+
+if (PASSWORD){
+  fetchData().then(ok => { if (ok) showPanel(); });
+}
+
+function showPanel(){
+  gate.style.display = 'none';
+  panel.hidden = false;
+  render();
+}
+
+/* === Fetch === */
+async function fetchData(){
+  try {
+    const res = await fetch('/api/export', {
+      headers: { 'X-Admin-Password': PASSWORD }
+    });
+    if (res.status === 401) return false;
+    if (!res.ok) throw new Error('Server error');
+    const json = await res.json();
+    DATA = json.rows || [];
+    applyFilters();
+    updateMismatchCount();
+    return true;
+  } catch (err){
+    console.error(err);
+    return false;
+  }
+}
+
+/* === Render === */
+function render(){
+  counter.textContent = `${FILTERED.length} ${FILTERED.length === 1 ? 'entry' : 'entries'}`;
+
+  if (FILTERED.length === 0){
+    tbody.innerHTML = `<tr><td colspan="13" class="empty">
+      <strong>${DATA.length === 0 ? 'No registrations yet' : 'No matches'}</strong>
+      ${DATA.length === 0 ? 'Once people submit the form, they\\'ll appear here.' : 'Try a different search.'}
+    </td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = FILTERED.map((r, i) => {
+    const mismatch = isMismatch(r);
+    const badge = mismatch ? '<span class="badge-mismatch">Different</span>' : '';
+    return `
+    <tr class="${mismatch ? 'mismatch' : ''}">
+      <td class="idx">${String(r.id).padStart(4,'0')}</td>
+      <td>${esc(r['Family name'])}</td>
+      <td>${esc(r['Given name'])}</td>
+      <td>${esc(r['Gender'])}</td>
+      <td>${esc(r['Country of Birth'])}${mismatch ? badge : ''}</td>
+      <td>${esc(r['Country of Residence'])}${mismatch ? badge : ''}</td>
+      <td>${esc(r['Date of Birth'])}</td>
+      <td><a href="mailto:${esc(r['E-mail'])}">${esc(r['E-mail'])}</a></td>
+      <td>${esc(r['Phone'])}</td>
+      <td>${esc(r['National affiliation code'])}</td>
+      <td>${r['Photo'] ? `<div class="photo-cell"><a href="${esc(r['Photo'])}" target="_blank" rel="noopener" title="View full size"><span class="thumb" style="background-image:url('${esc(r['Photo'])}')"></span></a><button type="button" class="thumb-dl" data-action="download" data-url="${esc(r['Photo'])}" data-filename="${esc(downloadFilename(r))}" title="Download photo"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button></div>` : ''}</td>
+      <td>${esc(r['Chinese name'] || '')}</td>
+      <td class="idx">${esc(r.submitted_at || '')}</td>
+    </tr>
+  `;}).join('');
+}
+
+function esc(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* === Photo download === */
+function downloadFilename(r){
+  const ln = String(r['Family name'] ?? '').replace(/[^A-Za-z0-9]/g, '_');
+  const fn = String(r['Given name']  ?? '').replace(/[^A-Za-z0-9]/g, '_');
+  return `${ln}_${fn}.jpg`;
+}
+
+async function downloadPhoto(url, filename, btn){
+  if (btn) btn.classList.add('busy');
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(objUrl); a.remove(); }, 200);
+    showToast(`Downloaded ${filename}`);
+  } catch (err){
+    console.error(err);
+    /* Fallback: open in new tab so the user can save manually */
+    window.open(url, '_blank', 'noopener');
+    showToast('Photo opened in new tab — right-click to save');
+  } finally {
+    if (btn) btn.classList.remove('busy');
+  }
+}
+
+/* Event delegation for per-row download buttons */
+document.getElementById('tbody').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action="download"]');
+  if (!btn) return;
+  e.preventDefault();
+  downloadPhoto(btn.dataset.url, btn.dataset.filename, btn);
+});
+
+/* === Search === */
+search.addEventListener('input', e => {
+  SEARCH_QUERY = e.target.value.toLowerCase().trim();
+  applyFilters();
+  render();
+});
+
+/* === Mismatch-only filter === */
+const mismatchToggle = document.getElementById('mismatchToggle');
+const mismatchFilter = document.getElementById('mismatchFilter');
+const mismatchCount  = document.getElementById('mismatchCount');
+
+function updateMismatchCount(){
+  const n = DATA.filter(isMismatch).length;
+  mismatchCount.textContent = n;
+  mismatchFilter.classList.toggle('has-results', n > 0);
+}
+
+mismatchToggle.addEventListener('change', e => {
+  MISMATCH_ONLY = e.target.checked;
+  applyFilters();
+  render();
+});
+
+/* === Refresh === */
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+  tbody.innerHTML = '<tr><td colspan="13" class="loader"><span class="spin"></span>Loading…</td></tr>';
+  search.value = '';
+  SEARCH_QUERY = '';
+  await fetchData();
+  render();
+});
+
+/* === Copy as TSV (for Google Sheets paste) === */
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  if (FILTERED.length === 0){
+    showToast('Nothing to copy', false);
+    return;
+  }
+  const lines = [COLUMNS.join('\t')];
+  for (const r of FILTERED){
+    lines.push(COLUMNS.map(c => tsvCell(r[c])).join('\t'));
+  }
+  const tsv = lines.join('\n');
+  try {
+    await navigator.clipboard.writeText(tsv);
+    showToast(`Copied ${FILTERED.length} ${FILTERED.length === 1 ? 'row' : 'rows'} — paste into Google Sheets`);
+  } catch {
+    /* Fallback: temporary textarea */
+    const ta = document.createElement('textarea');
+    ta.value = tsv;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showToast(`Copied ${FILTERED.length} rows`);
+  }
+});
+
+function tsvCell(v){
+  /* Strip tabs/newlines that would break TSV column alignment */
+  return String(v ?? '').replace(/\t/g,' ').replace(/\r?\n/g,' ');
+}
+
+/* === Download CSV === */
+document.getElementById('csvBtn').addEventListener('click', () => {
+  if (FILTERED.length === 0) return;
+  const csvLines = [COLUMNS.map(csvCell).join(',')];
+  for (const r of FILTERED){
+    csvLines.push(COLUMNS.map(c => csvCell(r[c])).join(','));
+  }
+  /* BOM so Excel opens UTF-8 (Chinese names) correctly */
+  const csv = '\ufeff' + csvLines.join('\r\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `wbf-ebl-registrations_${stamp}.csv`;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 100);
+});
+
+function csvCell(v){
+  const s = String(v ?? '');
+  if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+  return s;
+}
+
+/* === Toast === */
+let toastTimer;
+function showToast(msg){
+  toastMsg.textContent = msg;
+  toast.classList.add('active');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('active'), 2400);
+}
+</script>
+</body>
+</html>
