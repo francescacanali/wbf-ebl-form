@@ -188,6 +188,42 @@ td{
 }
 tbody tr:hover{background:var(--green-50)}
 
+/* === Selection === */
+tbody tr.selected{background:#ecfdf5}
+tbody tr.selected:hover{background:#d1fae5}
+.row-check, .head-check{
+  width:16px;height:16px;cursor:pointer;
+  accent-color:var(--green-800);vertical-align:middle;
+}
+td.col-check, th.col-check{
+  width:36px;padding-left:1rem;padding-right:.5rem;
+}
+
+.toolbar-selection{
+  display:none;align-items:center;gap:.6rem;flex-wrap:wrap;
+  width:100%;padding:.7rem 1.5rem;
+  background:#ecfdf5;border-bottom:1px solid #d1fae5;
+  font-size:.88rem;color:var(--green-800);font-weight:500;
+}
+.toolbar-selection.active{display:flex}
+.toolbar-selection .count{
+  background:var(--green-800);color:#fff;
+  padding:.15rem .55rem;border-radius:99px;
+  font-size:.78rem;font-weight:600;font-variant-numeric:tabular-nums;
+}
+.toolbar-selection .spacer{flex:1}
+.btn-clear-sel{
+  background:transparent;border:none;cursor:pointer;
+  font-size:.85rem;color:var(--green-800);
+  padding:.35rem .65rem;border-radius:var(--radius-sm);
+  text-decoration:underline;
+}
+.btn-clear-sel:hover{background:#d1fae5}
+.btn-danger{
+  background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;
+}
+.btn-danger:hover{background:#fee2e2;border-color:#fca5a5}
+
 /* === Country mismatch highlight === */
 tbody tr.mismatch td:first-child{
   border-left:3px solid #d97706;
@@ -329,7 +365,18 @@ td .thumb{
     </button>
     <button class="btn btn-primary" id="copyBtn">
       <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-      Copy for Google Sheets
+      Copy rows (no header)
+    </button>
+  </div>
+
+  <div class="toolbar-selection" id="selectionBar">
+    <span class="count" id="selectionCount">0</span>
+    <span><strong id="selectionLabel">selected</strong></span>
+    <button type="button" class="btn-clear-sel" id="clearSelBtn">Clear selection</button>
+    <span class="spacer"></span>
+    <button class="btn btn-danger" id="deleteBtn">
+      <svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M10 11v6M14 11v6"/></svg>
+      Delete selected
     </button>
   </div>
 
@@ -337,7 +384,9 @@ td .thumb{
     <table id="table">
       <thead>
         <tr>
+          <th class="col-check"><input type="checkbox" class="head-check" id="headCheck" title="Select all"></th>
           <th>#</th>
+          <th>Timestamp</th>
           <th>Family name</th>
           <th>Given name</th>
           <th>Gender</th>
@@ -346,14 +395,13 @@ td .thumb{
           <th>Date of Birth</th>
           <th>E-mail</th>
           <th>Phone</th>
-          <th>National affiliation code</th>
           <th>Photo</th>
+          <th>National affiliation code</th>
           <th>Chinese name</th>
-          <th>Submitted</th>
         </tr>
       </thead>
       <tbody id="tbody">
-        <tr><td colspan="13" class="loader"><span class="spin"></span>Loading…</td></tr>
+        <tr><td colspan="14" class="loader"><span class="spin"></span>Loading…</td></tr>
       </tbody>
     </table>
   </div>
@@ -365,17 +413,39 @@ td .thumb{
 </div>
 
 <script>
-/* === The exact columns and order requested === */
-const COLUMNS = [
-  'Family name','Given name','Gender','Country of Birth','Country of Residence',
-  'Date of Birth','E-mail','Phone','National affiliation code','Photo','Chinese name'
+/* === Sheet columns in EXACT order required for paste into the Google Sheet.
+   Some columns are constants (blank / consent text), others come from the DB. === */
+const CONSENT_TEXT_EN = "I authorise the World Bridge Federation (WBF) and the European Bridge League (EBL) to collect and retain my personal data for the purpose of maintaining the players\u2019 database. I understand that my data will be processed in compliance with applicable data protection laws, will not be shared with third parties except as required by law or under the respective Privacy Policies, and may be used by WBF and EBL to contact me with information regarding their activities and events. The relevant Privacy Policies are available on their official websites.";
+
+/* Each entry: [key for r[…], or special marker]. Special markers:
+   - '__blank'   → always empty
+   - '__consent' → fixed consent text */
+const SHEET_COLUMNS = [
+  'Timestamp',                  // A
+  '__blank',                    // B (Email Address — intentionally empty)
+  'Family name',                // C
+  'Given name',                 // D
+  'Gender',                     // E (rendered with emoji)
+  'Country of Birth',           // F
+  'Country of Residence',       // G
+  'Date of Birth',              // H
+  'E-mail',                     // I
+  'Phone',                      // J
+  'Photo',                      // K
+  '__consent',                  // L (Column 11 — always the consent text)
+  'National affiliation code',  // M
 ];
+
+/* The labels used internally by the admin table — these include the extra
+   useful ones we display on screen but that don't appear in the copy output. */
+const COLUMNS = SHEET_COLUMNS.filter(c => c !== '__blank' && c !== '__consent');
 
 let PASSWORD = sessionStorage.getItem('wbf_pwd') || '';
 let DATA = [];
 let FILTERED = [];
 let SEARCH_QUERY = '';
 let MISMATCH_ONLY = false;
+let SELECTED = new Set();
 
 function isMismatch(r){
   const a = String(r['Country of Birth']     || '').trim();
@@ -391,6 +461,31 @@ function applyFilters(){
     out = out.filter(r => COLUMNS.some(c => String(r[c] ?? '').toLowerCase().includes(q)));
   }
   FILTERED = out;
+}
+
+function updateSelectionUI(){
+  const n = SELECTED.size;
+  const bar = document.getElementById('selectionBar');
+  bar.classList.toggle('active', n > 0);
+  document.getElementById('selectionCount').textContent = n;
+  document.getElementById('selectionLabel').textContent = n === 1 ? 'row selected' : 'rows selected';
+
+  /* Update header checkbox state */
+  const headCheck = document.getElementById('headCheck');
+  if (headCheck){
+    const visibleIds = FILTERED.map(r => r.id);
+    const visibleSelected = visibleIds.filter(id => SELECTED.has(id)).length;
+    if (visibleSelected === 0){
+      headCheck.checked = false;
+      headCheck.indeterminate = false;
+    } else if (visibleSelected === visibleIds.length){
+      headCheck.checked = true;
+      headCheck.indeterminate = false;
+    } else {
+      headCheck.checked = false;
+      headCheck.indeterminate = true;
+    }
+  }
 }
 
 const gate = document.getElementById('gate');
@@ -454,7 +549,7 @@ function render(){
   counter.textContent = `${FILTERED.length} ${FILTERED.length === 1 ? 'entry' : 'entries'}`;
 
   if (FILTERED.length === 0){
-    tbody.innerHTML = `<tr><td colspan="13" class="empty">
+    tbody.innerHTML = `<tr><td colspan="14" class="empty">
       <strong>${DATA.length === 0 ? 'No registrations yet' : 'No matches'}</strong>
       ${DATA.length === 0 ? 'New registrations will appear here once submitted.' : 'Try a different search.'}
     </td></tr>`;
@@ -464,23 +559,27 @@ function render(){
   tbody.innerHTML = FILTERED.map((r, i) => {
     const mismatch = isMismatch(r);
     const badge = mismatch ? '<span class="badge-mismatch">Different</span>' : '';
+    const checked = SELECTED.has(r.id) ? 'checked' : '';
     return `
-    <tr class="${mismatch ? 'mismatch' : ''}">
+    <tr class="${mismatch ? 'mismatch ' : ''}${SELECTED.has(r.id) ? 'selected' : ''}" data-id="${r.id}">
+      <td class="col-check"><input type="checkbox" class="row-check" data-id="${r.id}" ${checked}></td>
       <td class="idx">${String(r.id).padStart(4,'0')}</td>
+      <td class="idx">${esc(r['Timestamp'] || '')}</td>
       <td>${esc(r['Family name'])}</td>
       <td>${esc(r['Given name'])}</td>
-      <td>${esc(r['Gender'])}</td>
+      <td>${esc(cellValue(r, 'Gender'))}</td>
       <td>${esc(r['Country of Birth'])}${mismatch ? badge : ''}</td>
       <td>${esc(r['Country of Residence'])}${mismatch ? badge : ''}</td>
       <td>${esc(r['Date of Birth'])}</td>
       <td><a href="mailto:${esc(r['E-mail'])}">${esc(r['E-mail'])}</a></td>
       <td>${esc(r['Phone'])}</td>
-      <td>${esc(r['National affiliation code'])}</td>
       <td>${r['Photo'] ? `<div class="photo-cell"><a href="${esc(r['Photo'])}" target="_blank" rel="noopener" title="View full size"><span class="thumb" style="background-image:url('${esc(r['Photo'])}')"></span></a><button type="button" class="thumb-dl" data-action="download" data-url="${esc(r['Photo'])}" data-filename="${esc(downloadFilename(r))}" title="Download photo"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button></div>` : ''}</td>
+      <td>${esc(r['National affiliation code'])}</td>
       <td>${esc(r['Chinese name'] || '')}</td>
-      <td class="idx">${esc(r.submitted_at || '')}</td>
     </tr>
   `;}).join('');
+
+  updateSelectionUI();
 }
 
 function esc(s){
@@ -548,52 +647,71 @@ mismatchToggle.addEventListener('change', e => {
 
 /* === Refresh === */
 document.getElementById('refreshBtn').addEventListener('click', async () => {
-  tbody.innerHTML = '<tr><td colspan="13" class="loader"><span class="spin"></span>Loading…</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="14" class="loader"><span class="spin"></span>Loading…</td></tr>';
   search.value = '';
   SEARCH_QUERY = '';
+  SELECTED.clear();
   await fetchData();
   render();
 });
 
-/* === Copy as TSV (for Google Sheets paste) === */
+/* === Copy as TSV (data only — no header — for Google Sheets paste) === */
 document.getElementById('copyBtn').addEventListener('click', async () => {
-  if (FILTERED.length === 0){
-    showToast('Nothing to copy', false);
+  const rows = SELECTED.size > 0
+    ? FILTERED.filter(r => SELECTED.has(r.id))
+    : FILTERED;
+  if (rows.length === 0){
+    showToast('Nothing to copy');
     return;
   }
-  const lines = [COLUMNS.join('\t')];
-  for (const r of FILTERED){
-    lines.push(COLUMNS.map(c => tsvCell(r[c])).join('\t'));
-  }
-  const tsv = lines.join('\n');
+  /* DATA ONLY — no header line — full sheet column order including B (blank) and L (consent) */
+  const tsv = rows.map(r => SHEET_COLUMNS.map(c => tsvCell(cellValue(r, c))).join('\t')).join('\n');
   try {
     await navigator.clipboard.writeText(tsv);
-    showToast(`Copied ${FILTERED.length} ${FILTERED.length === 1 ? 'row' : 'rows'} — paste into Google Sheets`);
   } catch {
-    /* Fallback: temporary textarea */
     const ta = document.createElement('textarea');
     ta.value = tsv;
     document.body.appendChild(ta);
     ta.select();
     document.execCommand('copy');
     ta.remove();
-    showToast(`Copied ${FILTERED.length} rows`);
   }
+  const label = SELECTED.size > 0 ? 'selected' : 'visible';
+  showToast(`Copied ${rows.length} ${rows.length === 1 ? 'row' : 'rows'} (${label}) — paste into Google Sheets`);
 });
 
 function tsvCell(v){
-  /* Strip tabs/newlines that would break TSV column alignment */
   return String(v ?? '').replace(/\t/g,' ').replace(/\r?\n/g,' ');
 }
 
-/* === Download CSV === */
-document.getElementById('csvBtn').addEventListener('click', () => {
-  if (FILTERED.length === 0) return;
-  const csvLines = [COLUMNS.map(csvCell).join(',')];
-  for (const r of FILTERED){
-    csvLines.push(COLUMNS.map(c => csvCell(r[c])).join(','));
+function cellValue(r, col){
+  if (col === '__blank')   return '';
+  if (col === '__consent') return CONSENT_TEXT_EN;
+  if (col === 'Gender'){
+    const g = r['Gender'];
+    if (g === 'Male')   return '\u2642\ufe0f Male';   /* ♂️ Male */
+    if (g === 'Female') return '\u2640\ufe0f Female'; /* ♀️ Female */
+    return g || '';
   }
-  /* BOM so Excel opens UTF-8 (Chinese names) correctly */
+  return r[col];
+}
+
+/* === Download CSV (keeps header — it's a file) === */
+document.getElementById('csvBtn').addEventListener('click', () => {
+  const rows = SELECTED.size > 0
+    ? FILTERED.filter(r => SELECTED.has(r.id))
+    : FILTERED;
+  if (rows.length === 0) return;
+  /* CSV: include a friendly header row, then data using SHEET_COLUMNS order */
+  const CSV_HEADERS = SHEET_COLUMNS.map(c => {
+    if (c === '__blank')   return 'Email Address';
+    if (c === '__consent') return 'Consent';
+    return c;
+  });
+  const csvLines = [CSV_HEADERS.map(csvCell).join(',')];
+  for (const r of rows){
+    csvLines.push(SHEET_COLUMNS.map(c => csvCell(cellValue(r, c))).join(','));
+  }
   const csv = '\ufeff' + csvLines.join('\r\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
@@ -610,6 +728,83 @@ function csvCell(v){
   if (/[",\r\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
   return s;
 }
+
+/* === Row checkbox handling === */
+document.getElementById('tbody').addEventListener('change', e => {
+  const cb = e.target.closest('.row-check');
+  if (!cb) return;
+  const id = Number(cb.dataset.id);
+  if (cb.checked) SELECTED.add(id);
+  else SELECTED.delete(id);
+  /* Toggle the selected class on the row without full re-render */
+  const tr = cb.closest('tr');
+  if (tr) tr.classList.toggle('selected', cb.checked);
+  updateSelectionUI();
+});
+
+/* === Master checkbox in header === */
+document.getElementById('headCheck').addEventListener('change', e => {
+  const want = e.target.checked;
+  if (want){
+    FILTERED.forEach(r => SELECTED.add(r.id));
+  } else {
+    FILTERED.forEach(r => SELECTED.delete(r.id));
+  }
+  render();
+});
+
+/* === Clear selection === */
+document.getElementById('clearSelBtn').addEventListener('click', () => {
+  SELECTED.clear();
+  render();
+});
+
+/* === Delete selected === */
+document.getElementById('deleteBtn').addEventListener('click', async () => {
+  const ids = Array.from(SELECTED);
+  if (ids.length === 0) return;
+
+  const label = ids.length === 1 ? 'this registration' : `these ${ids.length} registrations`;
+  const ok = confirm(`Delete ${label}?\n\nThis will permanently remove the entries from the database and delete the associated photos. This cannot be undone.`);
+  if (!ok) return;
+
+  const deleteBtn = document.getElementById('deleteBtn');
+  deleteBtn.disabled = true;
+  deleteBtn.style.opacity = '.6';
+
+  try {
+    const res = await fetch('/api/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Admin-Password': PASSWORD,
+      },
+      body: JSON.stringify({ ids }),
+    });
+    if (!res.ok){
+      let msg = 'Delete failed';
+      try { const j = await res.json(); if (j.error) msg = j.error; } catch(_){}
+      throw new Error(msg);
+    }
+    const data = await res.json();
+
+    /* Remove from local DATA, clear selection, re-render */
+    const deletedSet = new Set(ids);
+    DATA = DATA.filter(r => !deletedSet.has(r.id));
+    SELECTED.clear();
+    applyFilters();
+    updateMismatchCount();
+    render();
+    showToast(`Deleted ${data.deleted} ${data.deleted === 1 ? 'entry' : 'entries'}`);
+  } catch (err) {
+    console.error('[delete]', err);
+    showToast('Delete failed — see console');
+    alert('Delete failed: ' + (err.message || 'unknown error'));
+  } finally {
+    deleteBtn.disabled = false;
+    deleteBtn.style.opacity = '';
+  }
+});
 
 /* === Toast === */
 let toastTimer;
