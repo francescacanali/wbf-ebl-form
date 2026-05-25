@@ -40,35 +40,46 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
 body{
-  font-family:var(--font);background:var(--bg);color:var(--ink);
+  font-family:var(--font);
+  color:var(--ink);
   font-size:17px;line-height:1.55;
   -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
   min-height:100vh;
+  background:linear-gradient(180deg, #ffffff 0%, #f7f6f3 100%);
+  background-attachment:fixed;
 }
 
-.shell{max-width:680px;margin:0 auto;padding:1.5rem 1.5rem 4rem}
+.shell{
+  position:relative;
+  max-width:680px;margin:0 auto;padding:1.5rem 1.5rem 4rem;
+}
 
-/* === Language selector === */
+/* === Language selector (under intro text) === */
 .lang-bar{
-  display:flex;justify-content:center;
-  margin-bottom:2rem;
+  display:flex;align-items:center;gap:.75rem;
+  margin-top:1.5rem;
+  padding-top:1.5rem;
+  border-top:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.lang-label{
+  font-size:.78rem;font-weight:500;
+  color:var(--ink-3);
+  text-transform:uppercase;letter-spacing:.06em;
 }
 .lang-selector{
-  display:flex;align-items:center;gap:.15rem;
-  padding:.3rem;background:var(--surface);
-  border:1px solid var(--line);border-radius:99px;
-  box-shadow:var(--shadow-sm);
-  flex-wrap:wrap;justify-content:center;
+  display:flex;align-items:center;gap:.2rem;
+  flex-wrap:wrap;
 }
 .lang-btn{
-  font-family:var(--font);font-size:.9rem;font-weight:500;
-  padding:.5rem 1rem;background:transparent;color:var(--ink-2);
-  border:none;border-radius:99px;cursor:pointer;
-  transition:background .15s, color .15s;
+  font-family:var(--font);font-size:.88rem;font-weight:500;
+  padding:.45rem .85rem;background:var(--surface);color:var(--ink-2);
+  border:1px solid var(--line);border-radius:99px;cursor:pointer;
+  transition:background .15s, color .15s, border-color .15s;
   white-space:nowrap;
 }
-.lang-btn:hover{background:var(--line-2)}
-.lang-btn.active{background:var(--green-800);color:#fff;font-weight:600}
+.lang-btn:hover{background:var(--line-2);border-color:#d4d4d8}
+.lang-btn.active{background:var(--green-800);color:#fff;border-color:var(--green-800);font-weight:600}
 
 /* === Header === */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem;gap:1rem}
@@ -92,9 +103,12 @@ body{
   margin-top:1px;letter-spacing:.01em;
 }
 .header-tag{
-  font-size:.82rem;color:var(--ink-3);background:var(--surface);
-  border:1px solid var(--line);padding:.4rem .75rem;border-radius:99px;
-  display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;
+  font-size:.82rem;color:var(--ink-3);
+  background:#ffffff;
+  border:1px solid var(--line);
+  padding:.4rem .8rem;border-radius:99px;
+  display:inline-flex;align-items:center;gap:.5rem;white-space:nowrap;
+  font-weight:500;
 }
 .header-tag::before{
   content:'';width:6px;height:6px;border-radius:50%;
@@ -102,15 +116,48 @@ body{
 }
 
 /* === Intro === */
-.intro{margin-bottom:2.5rem}
-.intro h1{font-size:2.25rem;font-weight:700;letter-spacing:-.022em;line-height:1.15;margin-bottom:.85rem}
-.intro h1 .accent{color:var(--green-800)}
+.intro{
+  margin-bottom:2rem;
+  padding:2rem 2rem 1.75rem;
+  background:#ffffff;
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  box-shadow:0 1px 2px rgba(15, 23, 42, 0.03);
+}
+.intro h1{
+  font-size:2.25rem;font-weight:700;letter-spacing:-.022em;line-height:1.15;margin-bottom:.85rem;
+  color:var(--ink);
+}
+.intro h1 .accent{
+  color:var(--green-800);
+}
 .intro p{color:var(--ink-2);font-size:1.05rem;max-width:580px;line-height:1.6}
 
 /* === Form === */
 .form-card{
-  background:var(--surface);border:1px solid var(--line);
-  border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-sm);
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:var(--radius-lg);
+  padding:2.25rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px -8px rgba(15, 23, 42, 0.08),
+    0 24px 48px -16px rgba(20, 83, 45, 0.06);
+  position:relative;
+  overflow:hidden;
+}
+/* Decorative gradient stripe at the top of the card */
+.form-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:4px;
+  background:linear-gradient(90deg,
+    var(--green-800) 0%,
+    var(--green-600) 35%,
+    #c2922a 70%,
+    var(--green-800) 100%);
+  background-size:200% 100%;
+  opacity:.85;
 }
 .section + .section{margin-top:2rem;padding-top:2rem;border-top:1px solid var(--line-2)}
 .section-head{display:flex;align-items:center;gap:.65rem;margin-bottom:1.25rem}
@@ -146,6 +193,13 @@ body{
 }
 .field .hint{font-size:.82rem;color:var(--ink-3);margin-top:.2rem}
 .field .err{font-size:.82rem;color:var(--error);margin-top:.2rem;display:none}
+
+/* === Date of birth — three dropdowns === */
+.dob-row{
+  display:grid;
+  grid-template-columns:1fr 1.4fr 1fr;
+  gap:.5rem;
+}
 .field.invalid input,.field.invalid select{border-color:var(--error);background-color:var(--error-bg)}
 .field.invalid input:focus,.field.invalid select:focus{box-shadow:0 0 0 3px rgba(185,28,28,.10)}
 .field.invalid .err{display:block}
@@ -178,7 +232,55 @@ body{
 }
 .photo-up.has-photo .photo-edit{display:inline-block}
 
-/* === Banner === */
+/* === Consent box (GDPR) === */
+.consent-field{
+  margin-top:2rem;padding-top:1.75rem;
+  border-top:1px solid var(--line-2);
+}
+.consent-box{
+  display:flex;gap:.85rem;align-items:flex-start;
+  padding:1rem 1.1rem;
+  background:var(--green-50);
+  border:1px solid #d1fae5;
+  border-radius:var(--radius);
+  cursor:pointer;
+  transition:border-color .15s, background .15s;
+}
+.consent-box:hover{
+  background:#dcfce7;
+  border-color:#a7f3d0;
+}
+.consent-box input[type=checkbox]{
+  position:absolute;opacity:0;width:0;height:0;
+}
+.consent-mark{
+  flex-shrink:0;width:22px;height:22px;margin-top:.1rem;
+  border:2px solid #a7f3d0;border-radius:6px;
+  background:#fff;
+  display:grid;place-items:center;
+  transition:background .15s, border-color .15s;
+}
+.consent-mark svg{
+  width:14px;height:14px;
+  stroke:#fff;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  opacity:0;transition:opacity .15s;
+}
+.consent-box input:checked ~ .consent-mark{
+  background:var(--green-700);border-color:var(--green-700);
+}
+.consent-box input:checked ~ .consent-mark svg{opacity:1}
+.consent-box input:focus-visible ~ .consent-mark{
+  box-shadow:0 0 0 3px rgba(22,101,52,.18);
+}
+.consent-text{
+  flex:1;font-size:.88rem;line-height:1.55;color:var(--ink-2);
+}
+.consent-field.invalid .consent-box{
+  border-color:var(--error);background:var(--error-bg);
+}
+.consent-field.invalid .consent-mark{
+  border-color:var(--error);
+}
 .banner{
   display:none;margin-top:1rem;padding:.8rem 1rem;
   background:var(--error-bg);border:1px solid #fecaca;
@@ -194,18 +296,28 @@ body{
 .disclaimer{font-size:.85rem;color:var(--ink-3);max-width:330px;line-height:1.5}
 .btn{
   font-family:var(--font);font-size:.95rem;font-weight:600;
-  padding:.8rem 1.6rem;background:var(--green-800);color:#fff;
+  padding:.85rem 1.75rem;
+  background:linear-gradient(135deg, var(--green-800) 0%, var(--green-700) 100%);
+  color:#fff;
   border:none;border-radius:var(--radius);cursor:pointer;
   display:inline-flex;align-items:center;gap:.5rem;
-  transition:background .15s, transform .1s, box-shadow .15s;
-  box-shadow:0 1px 2px rgba(15,61,46,.2), inset 0 1px 0 rgba(255,255,255,.1);
+  transition:transform .12s, box-shadow .15s, filter .15s;
+  box-shadow:
+    0 1px 2px rgba(15,61,46,.25),
+    0 4px 12px -2px rgba(15,61,46,.15),
+    inset 0 1px 0 rgba(255,255,255,.12);
   white-space:nowrap;
+  letter-spacing:.005em;
 }
 .btn:hover{
-  background:var(--green-700);
-  box-shadow:0 4px 12px rgba(15,61,46,.22), inset 0 1px 0 rgba(255,255,255,.12);
+  filter:brightness(1.08);
+  box-shadow:
+    0 1px 2px rgba(15,61,46,.25),
+    0 8px 20px -2px rgba(15,61,46,.28),
+    inset 0 1px 0 rgba(255,255,255,.15);
+  transform:translateY(-1px);
 }
-.btn:active{transform:translateY(1px)}
+.btn:active{transform:translateY(0);filter:brightness(.96)}
 .btn:disabled{opacity:.65;cursor:wait}
 .btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .btn-ghost{background:transparent;color:var(--ink-2);border:1px solid var(--line);box-shadow:none}
@@ -219,9 +331,15 @@ body{
 .success{display:none;text-align:center;padding:2rem 1.5rem}
 .success.active{display:block}
 .success-mark{
-  width:60px;height:60px;background:var(--green-50);color:var(--green-700);
+  width:72px;height:72px;
+  background:linear-gradient(135deg, var(--green-50) 0%, #dcfce7 100%);
+  color:var(--green-700);
   border-radius:50%;display:grid;place-items:center;
-  margin:0 auto 1.5rem;font-size:1.8rem;
+  margin:0 auto 1.5rem;font-size:2.1rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, .04),
+    0 8px 16px -4px rgba(20, 83, 45, .15);
+  border:2px solid #d1fae5;
 }
 .success h2{font-size:1.55rem;font-weight:700;margin-bottom:.7rem;letter-spacing:-.015em}
 .success p{color:var(--ink-2);font-size:1.02rem;max-width:460px;margin:0 auto .75rem;line-height:1.6}
@@ -306,7 +424,8 @@ body{
 .reveal:nth-child(4){animation-delay:.26s}
 
 @media (max-width:640px){
-  .shell{padding:1.5rem 1.1rem 3rem}
+  .shell{padding:1.25rem 1rem 3rem}
+  .intro{padding:1.5rem 1.25rem 1.3rem;margin-bottom:1.5rem}
   .form-card{padding:1.5rem 1.1rem;border-radius:12px}
   .intro h1{font-size:1.85rem}
   .grid{grid-template-columns:1fr;gap:.9rem}
@@ -317,24 +436,13 @@ body{
   .cropper-card{max-width:none}
   .cropper-canvas-wrap{width:230px;height:288px}
   .lang-btn{font-size:.82rem;padding:.45rem .8rem}
+  .consent-text{font-size:.84rem}
 }
 </style>
 </head>
 <body>
 
 <div class="shell">
-
-  <!-- LANGUAGE SELECTOR -->
-  <nav class="lang-bar reveal" aria-label="Language">
-    <div class="lang-selector">
-      <button type="button" class="lang-btn" data-lang="en">English</button>
-      <button type="button" class="lang-btn" data-lang="fr">Français</button>
-      <button type="button" class="lang-btn" data-lang="es">Español</button>
-      <button type="button" class="lang-btn" data-lang="de">Deutsch</button>
-      <button type="button" class="lang-btn" data-lang="pl">Polski</button>
-      <button type="button" class="lang-btn" data-lang="zh">中文</button>
-    </div>
-  </nav>
 
   <header class="header reveal">
     <div class="brand">
@@ -350,6 +458,19 @@ body{
   <section class="intro reveal">
     <h1 data-i18n-html="intro_title">Player <span class="accent">registration</span>.</h1>
     <p data-i18n="intro_text">Add your profile to the World Bridge Federation &amp; European Bridge League shared player database. Name fields accept Latin letters only — no accents.</p>
+
+    <!-- LANGUAGE SELECTOR (now below the intro text, right above the form) -->
+    <nav class="lang-bar" aria-label="Language">
+      <span class="lang-label" data-i18n="lang_label">Language</span>
+      <div class="lang-selector">
+        <button type="button" class="lang-btn" data-lang="en">🇬🇧 English</button>
+        <button type="button" class="lang-btn" data-lang="fr">🇫🇷 Français</button>
+        <button type="button" class="lang-btn" data-lang="es">🇪🇸 Español</button>
+        <button type="button" class="lang-btn" data-lang="de">🇩🇪 Deutsch</button>
+        <button type="button" class="lang-btn" data-lang="pl">🇵🇱 Polski</button>
+        <button type="button" class="lang-btn" data-lang="zh">🇨🇳 中文</button>
+      </div>
+    </nav>
   </section>
 
   <main id="formMain" class="reveal">
@@ -362,13 +483,13 @@ body{
         <div class="grid">
           <div class="field">
             <label for="familyName"><span data-i18n="label_family">Family name</span><span class="req">*</span></label>
-            <input type="text" id="familyName" name="familyName" required maxlength="60" autocomplete="family-name" placeholder="Rossi" data-i18n-placeholder="placeholder_family">
+            <input type="text" id="familyName" name="familyName" required maxlength="60" autocomplete="family-name" placeholder="Smith" data-i18n-placeholder="placeholder_family">
             <div class="hint" data-i18n="hint_latin">Latin letters only · no accents.</div>
             <div class="err" data-i18n="err_latin">Use only basic Latin letters (A–Z), no accents.</div>
           </div>
           <div class="field">
             <label for="givenName"><span data-i18n="label_given">Given name</span><span class="req">*</span></label>
-            <input type="text" id="givenName" name="givenName" required maxlength="60" autocomplete="given-name" placeholder="Marco" data-i18n-placeholder="placeholder_given">
+            <input type="text" id="givenName" name="givenName" required maxlength="60" autocomplete="given-name" placeholder="John" data-i18n-placeholder="placeholder_given">
             <div class="hint" data-i18n="hint_latin">Latin letters only · no accents.</div>
             <div class="err" data-i18n="err_latin">Use only basic Latin letters (A–Z), no accents.</div>
           </div>
@@ -379,11 +500,22 @@ body{
               <option value="Female" data-i18n="gender_female">Female</option>
               <option value="Male" data-i18n="gender_male">Male</option>
             </select>
+            <div class="hint" data-i18n="hint_gender">As shown in your ID / Passport.</div>
             <div class="err" data-i18n="err_gender">Please select a gender.</div>
           </div>
           <div class="field">
-            <label for="dateOfBirth"><span data-i18n="label_dob">Date of birth</span><span class="req">*</span></label>
-            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            <label for="dobDay"><span data-i18n="label_dob">Date of birth</span><span class="req">*</span></label>
+            <div class="dob-row">
+              <select id="dobDay" name="dobDay" required aria-label="Day">
+                <option value="" data-i18n="dob_day">Day</option>
+              </select>
+              <select id="dobMonth" name="dobMonth" required aria-label="Month">
+                <option value="" data-i18n="dob_month">Month</option>
+              </select>
+              <select id="dobYear" name="dobYear" required aria-label="Year">
+                <option value="" data-i18n="dob_year">Year</option>
+              </select>
+            </div>
             <div class="err" data-i18n="err_dob">Please enter a valid date.</div>
           </div>
         </div>
@@ -410,7 +542,7 @@ body{
           </div>
           <div class="field">
             <label for="phone"><span data-i18n="label_phone">Phone</span><span class="req">*</span></label>
-            <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel" placeholder="+39 333 1234567">
+            <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel" placeholder="+331234567890">
             <div class="hint" data-i18n="hint_phone">Include country code.</div>
             <div class="err" data-i18n="err_phone">Please enter a valid phone number.</div>
           </div>
@@ -423,8 +555,8 @@ body{
         <div class="grid">
           <div class="field">
             <label for="affiliationCode"><span data-i18n="label_affiliation">National affiliation code</span><span class="req">*</span></label>
-            <input type="text" id="affiliationCode" name="affiliationCode" required maxlength="40" placeholder="ITA-12345">
-            <div class="hint" data-i18n="hint_affiliation">Federation code or membership number.</div>
+            <input type="text" id="affiliationCode" name="affiliationCode" required maxlength="40" placeholder="ABC012">
+            <div class="hint" data-i18n="hint_affiliation">Code assigned to you by the National Bridge Organization of your country of residence.</div>
             <div class="err" data-i18n="err_affiliation">Please enter your affiliation code.</div>
           </div>
           <div class="field">
@@ -448,6 +580,17 @@ body{
         </div>
       </div>
 
+      <div class="field consent-field grid-full" id="consentField">
+        <label class="consent-box">
+          <input type="checkbox" id="consent" name="consent" required>
+          <span class="consent-mark" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 5"/></svg>
+          </span>
+          <span class="consent-text" data-i18n="consent_text">I authorise the World Bridge Federation (WBF) and the European Bridge League (EBL) to collect and retain my personal data for the purpose of maintaining the players' database. I understand that my data will be processed in compliance with applicable data protection laws, will not be shared with third parties except as required by law or under the respective Privacy Policies, and may be used by WBF and EBL to contact me with information regarding their activities and events. The relevant Privacy Policies are available on their official websites.</span>
+        </label>
+        <div class="err" data-i18n="err_consent">Please confirm the authorisation before submitting.</div>
+      </div>
+
       <div class="banner" id="errorBanner"></div>
 
       <div class="actions">
@@ -461,8 +604,8 @@ body{
 
     <div class="form-card success" id="successPanel">
       <div class="success-mark">✓</div>
-      <h2 data-i18n="success_title">Registration received</h2>
-      <p data-i18n="success_text">Your profile has been added to the WBF · EBL shared database. A confirmation will be sent to the e-mail address provided.</p>
+      <h2 data-i18n="success_title">Registration submitted</h2>
+      <p data-i18n="success_text">Thank you. The WBF staff will review your submission and decide whether to add you to the WBF player database. Please allow <strong>24–72 hours</strong> for the review process.</p>
       <div class="ref-id"><span data-i18n="ref_label">Reference</span>: <strong id="refId"></strong></div>
       <button type="button" class="btn" onclick="resetForm()" data-i18n="btn_submit_another">Submit another</button>
     </div>
@@ -510,20 +653,22 @@ const I18N = {
     secure_form: "Secure form",
     intro_title: 'Player <span class="accent">registration</span>.',
     intro_text: "Add your profile to the World Bridge Federation & European Bridge League shared player database. Name fields accept Latin letters only — no accents.",
+    lang_label: "Language",
     sec1_title: "Identity", sec2_title: "Origin & contact", sec3_title: "Affiliation & photograph",
     label_family: "Family name", label_given: "Given name", label_gender: "Gender", label_dob: "Date of birth",
     label_country_birth: "Country of birth", label_country_res: "Country of residence",
     label_email: "E-mail", label_phone: "Phone", label_affiliation: "National affiliation code",
     label_chinese_name: "Chinese name", label_photo: "Profile photograph",
-    placeholder_family: "Rossi", placeholder_given: "Marco",
+    placeholder_family: "Smith", placeholder_given: "John",
     hint_latin: "Latin letters only · no accents.",
     hint_phone: "Include country code.",
-    hint_affiliation: "Federation code or membership number.",
+    hint_gender: "As shown in your ID / Passport.",
+    hint_affiliation: "Code assigned to you by the National Bridge Organization of your country of residence.",
     hint_chinese_name: "Optional · Chinese characters accepted.",
     photo_hint_default: "JPG, PNG or WEBP · A cropping tool will open after selection",
     err_latin: "Use only basic Latin letters (A–Z), no accents.",
     err_latin_specific: '"{ch}" is not allowed — Latin letters only, no accents.',
-    err_gender: "Please select a gender.", err_dob: "Please enter a valid date.",
+    err_gender: "Please select a gender.", err_dob: "Please enter a valid date of birth.",
     err_country_birth: "Please select your country of birth.",
     err_country_res: "Please select your country of residence.",
     err_email: "Please enter a valid e-mail address.",
@@ -532,15 +677,21 @@ const I18N = {
     err_photo: "A profile photograph is required.",
     select_placeholder: "Select…", select_country: "Select country…",
     gender_female: "Female", gender_male: "Male",
+    dob_day: "Day", dob_month: "Month", dob_year: "Year",
+    month_1:"January", month_2:"February", month_3:"March", month_4:"April",
+    month_5:"May", month_6:"June", month_7:"July", month_8:"August",
+    month_9:"September", month_10:"October", month_11:"November", month_12:"December",
     photo_label_upload: "Upload a photograph",
     photo_label_ready: "Photograph ready",
     photo_size_ready: "{size} KB · 500×626 JPEG · cropped",
     photo_recrop: "Re-crop",
     disclaimer: "By submitting you authorise WBF and EBL to store the data above in their shared player database.",
+    consent_text: "I authorise the World Bridge Federation (WBF) and the European Bridge League (EBL) to collect and retain my personal data for the purpose of maintaining the players' database. I understand that my data will be processed in compliance with applicable data protection laws, will not be shared with third parties except as required by law or under the respective Privacy Policies, and may be used by WBF and EBL to contact me with information regarding their activities and events. The relevant Privacy Policies are available on their official websites.",
+    err_consent: "Please confirm the authorisation above before submitting.",
     btn_submit: "Submit registration", btn_submitting: "Submitting…",
     btn_submit_another: "Submit another",
-    success_title: "Registration received",
-    success_text: "Your profile has been added to the WBF · EBL shared database. A confirmation will be sent to the e-mail address provided.",
+    success_title: "Registration submitted",
+    success_text: "Thank you. The WBF staff will review your submission and decide whether to add you to the WBF player database. Please allow <strong>24–72 hours</strong> for the review process.",
     ref_label: "Reference",
     cropper_title: "Adjust your photograph",
     cropper_subtitle: "Drag to position your face inside the frame.",
@@ -558,6 +709,7 @@ const I18N = {
     secure_form: "Formulaire sécurisé",
     intro_title: '<span class="accent">Inscription</span> joueur.',
     intro_text: "Ajoutez votre profil à la base de données partagée de la World Bridge Federation et de la European Bridge League. Les champs de nom n'acceptent que des lettres latines — sans accents.",
+    lang_label: "Langue",
     sec1_title: "Identité", sec2_title: "Origine et contact", sec3_title: "Affiliation et photographie",
     label_family: "Nom de famille", label_given: "Prénom", label_gender: "Sexe", label_dob: "Date de naissance",
     label_country_birth: "Pays de naissance", label_country_res: "Pays de résidence",
@@ -566,12 +718,13 @@ const I18N = {
     placeholder_family: "Dupont", placeholder_given: "Pierre",
     hint_latin: "Lettres latines uniquement · sans accents.",
     hint_phone: "Indicatif pays inclus.",
-    hint_affiliation: "Code de votre fédération ou numéro de membre.",
+    hint_gender: "Comme indiqué sur votre pièce d'identité / passeport.",
+    hint_affiliation: "Code attribué par l'organisation nationale de bridge de votre pays de résidence.",
     hint_chinese_name: "Facultatif · caractères chinois acceptés.",
     photo_hint_default: "JPG, PNG ou WEBP · Un outil de recadrage s'ouvrira après la sélection",
     err_latin: "Utilisez uniquement des lettres latines (A–Z), sans accents.",
     err_latin_specific: '« {ch} » n\'est pas autorisé — lettres latines uniquement, sans accents.',
-    err_gender: "Veuillez sélectionner un sexe.", err_dob: "Veuillez entrer une date valide.",
+    err_gender: "Veuillez sélectionner un sexe.", err_dob: "Veuillez entrer une date de naissance valide.",
     err_country_birth: "Veuillez sélectionner votre pays de naissance.",
     err_country_res: "Veuillez sélectionner votre pays de résidence.",
     err_email: "Veuillez entrer une adresse e-mail valide.",
@@ -580,15 +733,21 @@ const I18N = {
     err_photo: "Une photographie de profil est requise.",
     select_placeholder: "Sélectionner…", select_country: "Sélectionner un pays…",
     gender_female: "Femme", gender_male: "Homme",
+    dob_day: "Jour", dob_month: "Mois", dob_year: "Année",
+    month_1:"Janvier", month_2:"Février", month_3:"Mars", month_4:"Avril",
+    month_5:"Mai", month_6:"Juin", month_7:"Juillet", month_8:"Août",
+    month_9:"Septembre", month_10:"Octobre", month_11:"Novembre", month_12:"Décembre",
     photo_label_upload: "Téléverser une photographie",
     photo_label_ready: "Photographie prête",
     photo_size_ready: "{size} Ko · 500×626 JPEG · recadrée",
     photo_recrop: "Recadrer",
     disclaimer: "En soumettant ce formulaire, vous autorisez la WBF et l'EBL à stocker les données ci-dessus dans leur base de données partagée.",
+    consent_text: "J'autorise la World Bridge Federation (WBF) et la European Bridge League (EBL) à collecter et à conserver mes données personnelles dans le but de maintenir la base de données des joueurs. Je comprends que mes données seront traitées conformément aux lois applicables sur la protection des données, ne seront pas partagées avec des tiers sauf si la loi l'exige ou conformément aux Politiques de Confidentialité respectives, et pourront être utilisées par la WBF et l'EBL pour me contacter au sujet de leurs activités et événements. Les Politiques de Confidentialité sont disponibles sur leurs sites officiels.",
+    err_consent: "Veuillez confirmer l'autorisation ci-dessus avant d'envoyer.",
     btn_submit: "Envoyer l'inscription", btn_submitting: "Envoi…",
     btn_submit_another: "Inscrire un autre joueur",
-    success_title: "Inscription reçue",
-    success_text: "Votre profil a été ajouté à la base de données partagée WBF · EBL. Une confirmation sera envoyée à l'adresse e-mail fournie.",
+    success_title: "Inscription envoyée",
+    success_text: "Merci. L'équipe de la WBF examinera votre demande et décidera de l'ajouter ou non à la base de données des joueurs WBF. Veuillez compter <strong>24 à 72 heures</strong> pour le traitement.",
     ref_label: "Référence",
     cropper_title: "Ajustez votre photographie",
     cropper_subtitle: "Déplacez pour positionner votre visage dans le cadre.",
@@ -606,6 +765,7 @@ const I18N = {
     secure_form: "Formulario seguro",
     intro_title: '<span class="accent">Inscripción</span> de jugador.',
     intro_text: "Añade tu perfil a la base de datos compartida de jugadores de la World Bridge Federation y la European Bridge League. Los campos de nombre solo aceptan letras latinas — sin acentos.",
+    lang_label: "Idioma",
     sec1_title: "Identidad", sec2_title: "Origen y contacto", sec3_title: "Afiliación y fotografía",
     label_family: "Apellido", label_given: "Nombre", label_gender: "Sexo", label_dob: "Fecha de nacimiento",
     label_country_birth: "País de nacimiento", label_country_res: "País de residencia",
@@ -614,12 +774,13 @@ const I18N = {
     placeholder_family: "García", placeholder_given: "Juan",
     hint_latin: "Solo letras latinas · sin acentos.",
     hint_phone: "Incluye el código de país.",
-    hint_affiliation: "Código de federación o número de membresía.",
+    hint_gender: "Tal como figura en tu DNI / pasaporte.",
+    hint_affiliation: "Código asignado por la organización nacional de bridge de tu país de residencia.",
     hint_chinese_name: "Opcional · se aceptan caracteres chinos.",
     photo_hint_default: "JPG, PNG o WEBP · Se abrirá una herramienta de recorte tras la selección",
     err_latin: "Usa solo letras latinas básicas (A–Z), sin acentos.",
     err_latin_specific: '«{ch}» no está permitido — solo letras latinas, sin acentos.',
-    err_gender: "Selecciona un sexo.", err_dob: "Introduce una fecha válida.",
+    err_gender: "Selecciona un sexo.", err_dob: "Introduce una fecha de nacimiento válida.",
     err_country_birth: "Selecciona tu país de nacimiento.",
     err_country_res: "Selecciona tu país de residencia.",
     err_email: "Introduce un correo electrónico válido.",
@@ -628,15 +789,21 @@ const I18N = {
     err_photo: "Se requiere una fotografía de perfil.",
     select_placeholder: "Seleccionar…", select_country: "Seleccionar país…",
     gender_female: "Mujer", gender_male: "Hombre",
+    dob_day: "Día", dob_month: "Mes", dob_year: "Año",
+    month_1:"Enero", month_2:"Febrero", month_3:"Marzo", month_4:"Abril",
+    month_5:"Mayo", month_6:"Junio", month_7:"Julio", month_8:"Agosto",
+    month_9:"Septiembre", month_10:"Octubre", month_11:"Noviembre", month_12:"Diciembre",
     photo_label_upload: "Subir una fotografía",
     photo_label_ready: "Fotografía lista",
     photo_size_ready: "{size} KB · 500×626 JPEG · recortada",
     photo_recrop: "Recortar de nuevo",
     disclaimer: "Al enviar, autorizas a la WBF y la EBL a almacenar los datos anteriores en su base de datos compartida de jugadores.",
+    consent_text: "Autorizo a la World Bridge Federation (WBF) y a la European Bridge League (EBL) a recoger y conservar mis datos personales con el fin de mantener la base de datos de jugadores. Entiendo que mis datos serán tratados conforme a las leyes de protección de datos aplicables, no se compartirán con terceros salvo cuando lo exija la ley o conforme a las respectivas Políticas de Privacidad, y podrán ser utilizados por la WBF y la EBL para contactarme con información sobre sus actividades y eventos. Las Políticas de Privacidad están disponibles en sus sitios web oficiales.",
+    err_consent: "Por favor confirma la autorización anterior antes de enviar.",
     btn_submit: "Enviar inscripción", btn_submitting: "Enviando…",
     btn_submit_another: "Inscribir otro",
-    success_title: "Inscripción recibida",
-    success_text: "Tu perfil se ha añadido a la base de datos compartida WBF · EBL. Se enviará una confirmación al correo electrónico proporcionado.",
+    success_title: "Inscripción enviada",
+    success_text: "Gracias. El personal de la WBF revisará tu solicitud y decidirá si añadirte a la base de datos de jugadores WBF. Por favor permite <strong>24-72 horas</strong> para el proceso de revisión.",
     ref_label: "Referencia",
     cropper_title: "Ajustar tu fotografía",
     cropper_subtitle: "Arrastra para colocar tu cara dentro del marco.",
@@ -654,6 +821,7 @@ const I18N = {
     secure_form: "Sicheres Formular",
     intro_title: 'Spieler-<span class="accent">Registrierung</span>.',
     intro_text: "Fügen Sie Ihr Profil zur gemeinsamen Spielerdatenbank der World Bridge Federation und der European Bridge League hinzu. Namensfelder akzeptieren nur lateinische Buchstaben — ohne Akzente.",
+    lang_label: "Sprache",
     sec1_title: "Identität", sec2_title: "Herkunft und Kontakt", sec3_title: "Verband und Foto",
     label_family: "Familienname", label_given: "Vorname", label_gender: "Geschlecht", label_dob: "Geburtsdatum",
     label_country_birth: "Geburtsland", label_country_res: "Wohnsitzland",
@@ -662,12 +830,13 @@ const I18N = {
     placeholder_family: "Schmidt", placeholder_given: "Hans",
     hint_latin: "Nur lateinische Buchstaben · keine Akzente.",
     hint_phone: "Inkl. Ländervorwahl.",
-    hint_affiliation: "Verbandscode oder Mitgliedsnummer.",
+    hint_gender: "Wie auf Ihrem Ausweis / Pass angegeben.",
+    hint_affiliation: "Code, der Ihnen von der nationalen Bridge-Organisation Ihres Wohnsitzlandes zugewiesen wurde.",
     hint_chinese_name: "Optional · chinesische Schriftzeichen akzeptiert.",
     photo_hint_default: "JPG, PNG oder WEBP · Nach der Auswahl öffnet sich ein Zuschneide-Werkzeug",
     err_latin: "Verwenden Sie nur lateinische Grundbuchstaben (A–Z), keine Akzente.",
     err_latin_specific: '„{ch}" ist nicht erlaubt — nur lateinische Buchstaben, keine Akzente.',
-    err_gender: "Bitte wählen Sie ein Geschlecht.", err_dob: "Bitte geben Sie ein gültiges Datum ein.",
+    err_gender: "Bitte wählen Sie ein Geschlecht.", err_dob: "Bitte geben Sie ein gültiges Geburtsdatum ein.",
     err_country_birth: "Bitte wählen Sie Ihr Geburtsland.",
     err_country_res: "Bitte wählen Sie Ihr Wohnsitzland.",
     err_email: "Bitte geben Sie eine gültige E-Mail-Adresse ein.",
@@ -676,15 +845,21 @@ const I18N = {
     err_photo: "Ein Profilfoto ist erforderlich.",
     select_placeholder: "Auswählen…", select_country: "Land auswählen…",
     gender_female: "Weiblich", gender_male: "Männlich",
+    dob_day: "Tag", dob_month: "Monat", dob_year: "Jahr",
+    month_1:"Januar", month_2:"Februar", month_3:"März", month_4:"April",
+    month_5:"Mai", month_6:"Juni", month_7:"Juli", month_8:"August",
+    month_9:"September", month_10:"Oktober", month_11:"November", month_12:"Dezember",
     photo_label_upload: "Foto hochladen",
     photo_label_ready: "Foto bereit",
     photo_size_ready: "{size} KB · 500×626 JPEG · zugeschnitten",
     photo_recrop: "Neu zuschneiden",
     disclaimer: "Mit der Übermittlung erlauben Sie der WBF und der EBL, die oben genannten Daten in ihrer gemeinsamen Spielerdatenbank zu speichern.",
+    consent_text: "Ich ermächtige die World Bridge Federation (WBF) und die European Bridge League (EBL), meine personenbezogenen Daten zur Pflege der Spielerdatenbank zu erheben und zu speichern. Mir ist bewusst, dass meine Daten in Übereinstimmung mit den geltenden Datenschutzgesetzen verarbeitet werden, nicht an Dritte weitergegeben werden, außer wenn dies gesetzlich vorgeschrieben ist oder gemäß den jeweiligen Datenschutzrichtlinien, und von WBF und EBL verwendet werden dürfen, um mich über ihre Aktivitäten und Veranstaltungen zu informieren. Die entsprechenden Datenschutzrichtlinien sind auf den offiziellen Websites verfügbar.",
+    err_consent: "Bitte bestätigen Sie die Einwilligung oben, bevor Sie absenden.",
     btn_submit: "Registrierung absenden", btn_submitting: "Senden…",
     btn_submit_another: "Weitere Registrierung",
-    success_title: "Registrierung empfangen",
-    success_text: "Ihr Profil wurde zur gemeinsamen WBF · EBL-Datenbank hinzugefügt. Eine Bestätigung wird an die angegebene E-Mail-Adresse gesendet.",
+    success_title: "Registrierung übermittelt",
+    success_text: "Vielen Dank. Das WBF-Team wird Ihre Anmeldung prüfen und entscheiden, ob es Sie in die WBF-Spielerdatenbank aufnimmt. Bitte rechnen Sie mit <strong>24–72 Stunden</strong> für die Bearbeitung.",
     ref_label: "Referenz",
     cropper_title: "Foto anpassen",
     cropper_subtitle: "Ziehen Sie, um Ihr Gesicht im Rahmen zu positionieren.",
@@ -702,6 +877,7 @@ const I18N = {
     secure_form: "Bezpieczny formularz",
     intro_title: '<span class="accent">Rejestracja</span> zawodnika.',
     intro_text: "Dodaj swój profil do wspólnej bazy danych zawodników Światowej Federacji Brydża i Europejskiej Ligi Brydża. Pola imion akceptują tylko litery łacińskie — bez znaków diakrytycznych.",
+    lang_label: "Język",
     sec1_title: "Tożsamość", sec2_title: "Pochodzenie i kontakt", sec3_title: "Przynależność i zdjęcie",
     label_family: "Nazwisko", label_given: "Imię", label_gender: "Płeć", label_dob: "Data urodzenia",
     label_country_birth: "Kraj urodzenia", label_country_res: "Kraj zamieszkania",
@@ -710,12 +886,13 @@ const I18N = {
     placeholder_family: "Kowalski", placeholder_given: "Jan",
     hint_latin: "Tylko litery łacińskie · bez znaków diakrytycznych.",
     hint_phone: "Dołącz kod kraju.",
-    hint_affiliation: "Kod federacji lub numer członkowski.",
+    hint_gender: "Tak jak na dowodzie osobistym / paszporcie.",
+    hint_affiliation: "Kod nadany przez krajową organizację brydża kraju zamieszkania.",
     hint_chinese_name: "Opcjonalnie · znaki chińskie akceptowane.",
     photo_hint_default: "JPG, PNG lub WEBP · Narzędzie kadrowania otworzy się po wybraniu",
     err_latin: "Używaj tylko podstawowych liter łacińskich (A–Z), bez znaków diakrytycznych.",
     err_latin_specific: '„{ch}" nie jest dozwolone — tylko litery łacińskie, bez znaków diakrytycznych.',
-    err_gender: "Wybierz płeć.", err_dob: "Podaj prawidłową datę.",
+    err_gender: "Wybierz płeć.", err_dob: "Podaj prawidłową datę urodzenia.",
     err_country_birth: "Wybierz kraj urodzenia.",
     err_country_res: "Wybierz kraj zamieszkania.",
     err_email: "Podaj prawidłowy adres e-mail.",
@@ -724,15 +901,21 @@ const I18N = {
     err_photo: "Wymagane jest zdjęcie profilowe.",
     select_placeholder: "Wybierz…", select_country: "Wybierz kraj…",
     gender_female: "Kobieta", gender_male: "Mężczyzna",
+    dob_day: "Dzień", dob_month: "Miesiąc", dob_year: "Rok",
+    month_1:"Styczeń", month_2:"Luty", month_3:"Marzec", month_4:"Kwiecień",
+    month_5:"Maj", month_6:"Czerwiec", month_7:"Lipiec", month_8:"Sierpień",
+    month_9:"Wrzesień", month_10:"Październik", month_11:"Listopad", month_12:"Grudzień",
     photo_label_upload: "Prześlij zdjęcie",
     photo_label_ready: "Zdjęcie gotowe",
     photo_size_ready: "{size} KB · 500×626 JPEG · przycięte",
     photo_recrop: "Przytnij ponownie",
     disclaimer: "Wysyłając formularz, upoważniasz WBF i EBL do przechowywania powyższych danych we wspólnej bazie zawodników.",
+    consent_text: "Upoważniam Światową Federację Brydża (WBF) i Europejską Ligę Brydża (EBL) do zbierania i przechowywania moich danych osobowych w celu prowadzenia bazy zawodników. Rozumiem, że moje dane będą przetwarzane zgodnie z obowiązującymi przepisami o ochronie danych, nie będą udostępniane osobom trzecim z wyjątkiem przypadków wymaganych przez prawo lub zgodnie z odpowiednimi Politykami Prywatności, oraz mogą być wykorzystywane przez WBF i EBL do kontaktowania się ze mną w sprawie ich działalności i wydarzeń. Odpowiednie Polityki Prywatności są dostępne na ich oficjalnych stronach internetowych.",
+    err_consent: "Proszę potwierdzić powyższą zgodę przed wysłaniem.",
     btn_submit: "Wyślij rejestrację", btn_submitting: "Wysyłanie…",
     btn_submit_another: "Zarejestruj kolejnego",
-    success_title: "Rejestracja przyjęta",
-    success_text: "Twój profil został dodany do wspólnej bazy WBF · EBL. Potwierdzenie zostanie wysłane na podany adres e-mail.",
+    success_title: "Rejestracja wysłana",
+    success_text: "Dziękujemy. Zespół WBF rozpatrzy Twoje zgłoszenie i zdecyduje, czy dodać Cię do bazy zawodników WBF. Proszę dać <strong>24-72 godzin</strong> na proces weryfikacji.",
     ref_label: "Numer referencyjny",
     cropper_title: "Dostosuj zdjęcie",
     cropper_subtitle: "Przeciągnij, aby ustawić twarz w ramce.",
@@ -750,6 +933,7 @@ const I18N = {
     secure_form: "安全表单",
     intro_title: '球员<span class="accent">注册</span>。',
     intro_text: "将您的资料添加到世界桥牌联合会和欧洲桥牌联盟共享球员数据库。姓名字段仅接受拉丁字母 — 不含重音符号。",
+    lang_label: "语言",
     sec1_title: "身份信息", sec2_title: "出生地与联系方式", sec3_title: "协会与照片",
     label_family: "姓", label_given: "名", label_gender: "性别", label_dob: "出生日期",
     label_country_birth: "出生国家", label_country_res: "居住国家",
@@ -758,12 +942,13 @@ const I18N = {
     placeholder_family: "Wang", placeholder_given: "Ming",
     hint_latin: "仅限拉丁字母 · 不含重音符号。",
     hint_phone: "请包含国家代码。",
-    hint_affiliation: "您的协会代码或会员编号。",
+    hint_gender: "请按身份证 / 护照上的信息填写。",
+    hint_affiliation: "由您居住国家的国家桥牌组织分配的代码。",
     hint_chinese_name: "可选 · 接受中文字符。",
     photo_hint_default: "JPG、PNG 或 WEBP · 选择后将打开裁剪工具",
     err_latin: "请只使用基本拉丁字母（A–Z），不含重音符号。",
-    err_latin_specific: '不允许"{ch}" — 仅限拉丁字母，不含重音符号。',
-    err_gender: "请选择性别。", err_dob: "请输入有效的日期。",
+    err_latin_specific: '不允许"{ch}" — 仅限拉丁字母,不含重音符号。',
+    err_gender: "请选择性别。", err_dob: "请输入有效的出生日期。",
     err_country_birth: "请选择出生国家。",
     err_country_res: "请选择居住国家。",
     err_email: "请输入有效的电子邮箱地址。",
@@ -772,15 +957,21 @@ const I18N = {
     err_photo: "需要提交个人照片。",
     select_placeholder: "选择…", select_country: "选择国家…",
     gender_female: "女", gender_male: "男",
+    dob_day: "日", dob_month: "月", dob_year: "年",
+    month_1:"一月", month_2:"二月", month_3:"三月", month_4:"四月",
+    month_5:"五月", month_6:"六月", month_7:"七月", month_8:"八月",
+    month_9:"九月", month_10:"十月", month_11:"十一月", month_12:"十二月",
     photo_label_upload: "上传照片",
     photo_label_ready: "照片已就绪",
     photo_size_ready: "{size} KB · 500×626 JPEG · 已裁剪",
     photo_recrop: "重新裁剪",
     disclaimer: "提交即表示您授权 WBF 和 EBL 将上述数据存储在其共享球员数据库中。",
+    consent_text: "我授权世界桥牌联合会 (WBF) 和欧洲桥牌联盟 (EBL) 收集并保留我的个人数据,用于维护球员数据库。我理解我的数据将根据适用的数据保护法律进行处理,除法律要求或根据相应的隐私政策外,不会与第三方共享,并可能被 WBF 和 EBL 用于联系我以告知其活动和赛事信息。相关的隐私政策可在其官方网站上查阅。",
+    err_consent: "请在提交前确认上述授权。",
     btn_submit: "提交注册", btn_submitting: "提交中…",
     btn_submit_another: "再注册一位球员",
-    success_title: "注册已收到",
-    success_text: "您的资料已添加到 WBF · EBL 共享数据库。确认信息将发送至您提供的电子邮箱。",
+    success_title: "注册已提交",
+    success_text: "谢谢。WBF 工作人员将审核您的申请,并决定是否将您添加到 WBF 球员数据库。请预留 <strong>24-72 小时</strong> 的审核时间。",
     ref_label: "参考编号",
     cropper_title: "调整您的照片",
     cropper_subtitle: "拖动以将您的面部置于框内。",
@@ -825,6 +1016,7 @@ function applyLanguage(lang){
 
   /* Refresh country dropdowns with localized placeholder */
   buildCountryDropdowns();
+  buildDobDropdowns();
 
   /* Update active button */
   document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -872,6 +1064,36 @@ function buildCountryDropdowns(){
       COUNTRIES.map(c=>`<option value="${c}">${c}</option>`).join('');
     if (current) sel.value = current;
   });
+}
+
+/* === Date of birth dropdowns === */
+function buildDobDropdowns(){
+  const daySel   = document.getElementById('dobDay');
+  const monthSel = document.getElementById('dobMonth');
+  const yearSel  = document.getElementById('dobYear');
+
+  /* Preserve existing selections across language change */
+  const cur = { d: daySel.value, m: monthSel.value, y: yearSel.value };
+
+  /* Days */
+  let dayHtml = `<option value="">${t('dob_day')}</option>`;
+  for (let d = 1; d <= 31; d++) dayHtml += `<option value="${d}">${d}</option>`;
+  daySel.innerHTML = dayHtml;
+
+  /* Months — value is 1-12, label is localized */
+  let monthHtml = `<option value="">${t('dob_month')}</option>`;
+  for (let m = 1; m <= 12; m++) monthHtml += `<option value="${m}">${t('month_'+m)}</option>`;
+  monthSel.innerHTML = monthHtml;
+
+  /* Years — current year down to 110 years ago */
+  const thisYear = new Date().getFullYear();
+  let yearHtml = `<option value="">${t('dob_year')}</option>`;
+  for (let y = thisYear; y >= thisYear - 110; y--) yearHtml += `<option value="${y}">${y}</option>`;
+  yearSel.innerHTML = yearHtml;
+
+  if (cur.d) daySel.value   = cur.d;
+  if (cur.m) monthSel.value = cur.m;
+  if (cur.y) yearSel.value  = cur.y;
 }
 
 /* =========================================================
@@ -1151,10 +1373,13 @@ function validateField(field){
   if ((field.id === 'familyName' || field.id === 'givenName') && val) valid = LATIN_RE.test(val);
   if (field.id === 'photo') valid = croppedBlob !== null;
 
-  /* When the strict-latin handler has just stripped a char, don't override its specific error */
+  /* DOB dropdowns share one .field — validate as a group via validateDob() */
+  if (['dobDay','dobMonth','dobYear'].includes(field.id)){
+    return validateDob();
+  }
+
   if (!valid || !latinJustStripped[field.id]){
     if (errEl && !latinJustStripped[field.id]){
-      /* Restore the i18n default message */
       const key = errEl.dataset.i18n;
       if (key && I18N[CURRENT_LANG][key]) errEl.textContent = I18N[CURRENT_LANG][key];
     }
@@ -1162,6 +1387,11 @@ function validateField(field){
   }
   return valid;
 }
+
+/* Clear consent error as soon as user ticks the box */
+document.getElementById('consent').addEventListener('change', e => {
+  if (e.target.checked) document.getElementById('consentField').classList.remove('invalid');
+});
 
 document.querySelectorAll('#registrationForm input, #registrationForm select').forEach(field => {
   field.addEventListener('blur', () => validateField(field));
@@ -1177,7 +1407,32 @@ document.querySelectorAll('#registrationForm input, #registrationForm select').f
   }
 });
 
-document.getElementById('dateOfBirth').max = new Date().toISOString().split('T')[0];
+/* === DOB validation: must be a valid existing date, not in the future === */
+function getDobDate(){
+  const d = parseInt(document.getElementById('dobDay').value, 10);
+  const m = parseInt(document.getElementById('dobMonth').value, 10);
+  const y = parseInt(document.getElementById('dobYear').value, 10);
+  if (!d || !m || !y) return null;
+  const dt = new Date(y, m - 1, d);
+  /* Reject day overflow (e.g. Feb 31 -> Mar 3) */
+  if (dt.getFullYear() !== y || dt.getMonth() !== m - 1 || dt.getDate() !== d) return null;
+  if (dt > new Date()) return null;
+  return dt;
+}
+
+function validateDob(){
+  const wrap = document.getElementById('dobDay').closest('.field');
+  const ok = !!getDobDate();
+  wrap.classList.toggle('invalid', !ok);
+  return ok;
+}
+
+['dobDay','dobMonth','dobYear'].forEach(id => {
+  document.getElementById(id).addEventListener('change', () => {
+    const wrap = document.getElementById('dobDay').closest('.field');
+    if (wrap.classList.contains('invalid')) validateDob();
+  });
+});
 
 /* =========================================================
    SUBMIT — with 60s timeout + clear error reporting
@@ -1204,6 +1459,17 @@ form.addEventListener('submit', async e => {
   form.querySelectorAll('input[required], select[required]').forEach(f => {
     if (!validateField(f)) allValid = false;
   });
+
+  /* Consent checkbox must be ticked */
+  const consent = document.getElementById('consent');
+  const consentField = document.getElementById('consentField');
+  if (!consent.checked){
+    consentField.classList.add('invalid');
+    allValid = false;
+  } else {
+    consentField.classList.remove('invalid');
+  }
+
   if (!allValid){
     form.querySelector('.field.invalid')?.scrollIntoView({behavior:'smooth',block:'center'});
     return;
@@ -1216,10 +1482,25 @@ form.addEventListener('submit', async e => {
 
   try {
     const formData = new FormData();
-    ['familyName','givenName','gender','countryBirth','countryResidence',
-     'dateOfBirth','email','phone','affiliationCode','chineseName'].forEach(k => {
-      formData.append(k, document.getElementById(k).value.trim());
-    });
+
+    /* Build dateOfBirth as m/d/yyyy from the three dropdowns (no zero padding) */
+    const dobDate = getDobDate();
+    const dobStr = dobDate
+      ? `${dobDate.getMonth()+1}/${dobDate.getDate()}/${dobDate.getFullYear()}`
+      : '';
+
+    formData.append('familyName',       document.getElementById('familyName').value.trim());
+    formData.append('givenName',        document.getElementById('givenName').value.trim());
+    formData.append('gender',           document.getElementById('gender').value);
+    formData.append('countryBirth',     document.getElementById('countryBirth').value);
+    formData.append('countryResidence', document.getElementById('countryResidence').value);
+    formData.append('dateOfBirth',      dobStr);
+    formData.append('email',            document.getElementById('email').value.trim());
+    formData.append('phone',            document.getElementById('phone').value.trim());
+    formData.append('affiliationCode',  document.getElementById('affiliationCode').value.trim());
+    formData.append('chineseName',      document.getElementById('chineseName').value.trim());
+    formData.append('consent',          '1');
+
     const lastName  = document.getElementById('familyName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
     const firstName = document.getElementById('givenName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
     formData.append('photo', croppedBlob, `${lastName}_${firstName}.jpg`);
@@ -1270,11 +1551,13 @@ function resetForm(){
   refreshPhotoStateLabel();
   setSubmitting(false);
   document.querySelectorAll('.field.invalid').forEach(f => f.classList.remove('invalid'));
+  document.getElementById('consentField').classList.remove('invalid');
   window.scrollTo({top:0, behavior:'smooth'});
 }
 
 /* === Boot === */
 buildCountryDropdowns();
+buildDobDropdowns();
 applyLanguage(CURRENT_LANG);
 </script>
 </body>
