@@ -109,13 +109,13 @@ export default async function handler(req, res){
 
     console.log('[register] uploading blob:', pathname);
     const blob = await put(pathname, photo.buffer, {
-      access: 'private',
+      access: 'public',
       contentType: photo.mimeType,
       addRandomSuffix: false,
     });
     console.log('[register] blob uploaded', { elapsedMs: Date.now() - t0, returnedUrl: blob.url });
 
-    /* Store the pathname — admin viewer fetches photos through /api/photo proxy */
+    /* Store the public URL directly in the DB so the admin can fetch it without a proxy */
     console.log('[register] inserting row...');
     const rows = await sql`
       INSERT INTO registrations
@@ -123,7 +123,7 @@ export default async function handler(req, res){
          date_of_birth, email, phone, affiliation_code, photo_url, chinese_name)
       VALUES
         (${familyName}, ${givenName}, ${gender}, ${countryBirth}, ${countryResidence},
-         ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${pathname}, ${chineseName || null})
+         ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${blob.url}, ${chineseName || null})
       RETURNING id
     `;
     console.log('[register] row inserted', { elapsedMs: Date.now() - t0, id: rows[0].id });
