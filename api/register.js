@@ -77,6 +77,11 @@ export default async function handler(req, res){
     const phone            = fields.phone            || '';
     const affiliationCode  = fields.affiliationCode  || '';
     const chineseName      = fields.chineseName      || '';
+    const consent          = fields.consent          || '';
+
+    if (consent !== '1'){
+      return res.status(400).json({ error: 'Authorisation to store personal data is required.' });
+    }
 
     if (!familyName || !givenName || !gender || !countryBirth || !countryResidence
         || !dateOfBirth || !email || !phone || !affiliationCode){
@@ -90,9 +95,21 @@ export default async function handler(req, res){
     }
     if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Invalid e-mail address.' });
     if (!PHONE_RE.test(phone)) return res.status(400).json({ error: 'Invalid phone number.' });
-    if (isNaN(Date.parse(dateOfBirth))){
+
+    /* Date arrives as mm/dd/yyyy. Validate and convert to ISO yyyy-mm-dd for Postgres. */
+    const dobMatch = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(dateOfBirth);
+    if (!dobMatch){
+      return res.status(400).json({ error: 'Invalid date of birth (expected mm/dd/yyyy).' });
+    }
+    const dobM = Number(dobMatch[1]);
+    const dobD = Number(dobMatch[2]);
+    const dobY = Number(dobMatch[3]);
+    const dobJs = new Date(dobY, dobM - 1, dobD);
+    if (dobJs.getFullYear() !== dobY || dobJs.getMonth() !== dobM - 1 || dobJs.getDate() !== dobD
+        || dobJs > new Date()){
       return res.status(400).json({ error: 'Invalid date of birth.' });
     }
+    const dobIso = `${dobY}-${String(dobM).padStart(2,'0')}-${String(dobD).padStart(2,'0')}`;
     if (!photo || !photo.buffer || photo.buffer.length === 0){
       return res.status(400).json({ error: 'A profile photograph is required.' });
     }
@@ -123,7 +140,7 @@ export default async function handler(req, res){
          date_of_birth, email, phone, affiliation_code, photo_url, chinese_name)
       VALUES
         (${familyName}, ${givenName}, ${gender}, ${countryBirth}, ${countryResidence},
-         ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${blob.url}, ${chineseName || null})
+         ${dobIso}, ${email}, ${phone}, ${affiliationCode}, ${blob.url}, ${chineseName || null})
       RETURNING id
     `;
     console.log('[register] row inserted', { elapsedMs: Date.now() - t0, id: rows[0].id });
