@@ -342,7 +342,30 @@ body{
   border:2px solid #d1fae5;
 }
 .success h2{font-size:1.55rem;font-weight:700;margin-bottom:.7rem;letter-spacing:-.015em}
-.success p{color:var(--ink-2);font-size:1.02rem;max-width:460px;margin:0 auto .75rem;line-height:1.6}
+.success-lead{color:var(--ink-2);font-size:1.02rem;max-width:520px;margin:0 auto 1.5rem;line-height:1.6}
+.success-list{
+  list-style:none;padding:0;margin:0 auto 1.5rem;
+  max-width:520px;text-align:left;
+  display:flex;flex-direction:column;gap:.7rem;
+}
+.success-list li{
+  position:relative;
+  padding:.65rem .85rem .65rem 2.2rem;
+  background:var(--green-50);
+  border:1px solid #d1fae5;
+  border-radius:var(--radius-sm);
+  font-size:.95rem;line-height:1.5;
+  color:var(--ink-2);
+}
+.success-list li::before{
+  content:'';
+  position:absolute;left:.85rem;top:1.05rem;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--green-700);
+}
+.success-list strong{color:var(--green-800);font-weight:700}
+.success-list a{color:var(--green-700);font-weight:600;text-decoration:underline}
+.success-list a:hover{color:var(--green-800)}
 .ref-id{
   background:var(--line-2);padding:.7rem 1rem;border-radius:var(--radius-sm);
   margin:1.5rem auto;max-width:320px;font-size:.92rem;color:var(--ink-2);
@@ -605,7 +628,12 @@ body{
     <div class="form-card success" id="successPanel">
       <div class="success-mark">✓</div>
       <h2 data-i18n="success_title">Registration submitted</h2>
-      <p data-i18n="success_text">Thank you. The WBF staff will review your submission and decide whether to add you to the WBF player database. Please allow <strong>24–72 hours</strong> for the review process.</p>
+      <p class="success-lead" data-i18n="success_text">Thank you. The WBF staff will review your submission.</p>
+      <ul class="success-list">
+        <li data-i18n-html="success_li_1">Please allow <strong>24–72 hours</strong> for the review process.</li>
+        <li data-i18n-html="success_li_2">Until you are added to the database by the WBF staff, you cannot register for EBL / WBF tournaments, championships or events.</li>
+        <li data-i18n-html="success_li_3">For urgent matters or issues, please contact <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.</li>
+      </ul>
       <div class="ref-id"><span data-i18n="ref_label">Reference</span>: <strong id="refId"></strong></div>
       <button type="button" class="btn" onclick="resetForm()" data-i18n="btn_submit_another">Submit another</button>
     </div>
@@ -691,7 +719,10 @@ const I18N = {
     btn_submit: "Submit registration", btn_submitting: "Submitting…",
     btn_submit_another: "Submit another",
     success_title: "Registration submitted",
-    success_text: "Thank you. The WBF staff will review your submission and decide whether to add you to the WBF player database. Please allow <strong>24–72 hours</strong> for the review process.",
+    success_text: "Thank you. The WBF staff will review your submission.",
+    success_li_1: "Please allow <strong>24–72 hours</strong> for the review process.",
+    success_li_2: "Until you are added to the database by the WBF staff, you cannot register for EBL / WBF tournaments, championships or events.",
+    success_li_3: 'For urgent matters or issues, please contact <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.',
     ref_label: "Reference",
     cropper_title: "Adjust your photograph",
     cropper_subtitle: "Drag to position your face inside the frame.",
@@ -747,7 +778,10 @@ const I18N = {
     btn_submit: "Envoyer l'inscription", btn_submitting: "Envoi…",
     btn_submit_another: "Inscrire un autre joueur",
     success_title: "Inscription envoyée",
-    success_text: "Merci. L'équipe de la WBF examinera votre demande et décidera de l'ajouter ou non à la base de données des joueurs WBF. Veuillez compter <strong>24 à 72 heures</strong> pour le traitement.",
+    success_text: "Merci. L'équipe de la WBF examinera votre demande.",
+    success_li_1: "Veuillez compter <strong>24 à 72 heures</strong> pour le traitement.",
+    success_li_2: "Tant que vous n'êtes pas ajouté à la base de données par l'équipe de la WBF, vous ne pouvez pas vous inscrire aux tournois, championnats ou événements EBL / WBF.",
+    success_li_3: 'Pour toute urgence ou problème, veuillez contacter <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.',
     ref_label: "Référence",
     cropper_title: "Ajustez votre photographie",
     cropper_subtitle: "Déplacez pour positionner votre visage dans le cadre.",
@@ -803,7 +837,10 @@ const I18N = {
     btn_submit: "Enviar inscripción", btn_submitting: "Enviando…",
     btn_submit_another: "Inscribir otro",
     success_title: "Inscripción enviada",
-    success_text: "Gracias. El personal de la WBF revisará tu solicitud y decidirá si añadirte a la base de datos de jugadores WBF. Por favor permite <strong>24-72 horas</strong> para el proceso de revisión.",
+    success_text: "Gracias. El personal de la WBF revisará tu solicitud.",
+    success_li_1: "Por favor permite <strong>24–72 horas</strong> para el proceso de revisión.",
+    success_li_2: "Hasta que el personal de la WBF te añada a la base de datos, no puedes inscribirte en torneos, campeonatos o eventos EBL / WBF.",
+    success_li_3: 'Para asuntos urgentes o problemas, por favor contacta <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.',
     ref_label: "Referencia",
     cropper_title: "Ajustar tu fotografía",
     cropper_subtitle: "Arrastra para colocar tu cara dentro del marco.",
@@ -859,7 +896,10 @@ const I18N = {
     btn_submit: "Registrierung absenden", btn_submitting: "Senden…",
     btn_submit_another: "Weitere Registrierung",
     success_title: "Registrierung übermittelt",
-    success_text: "Vielen Dank. Das WBF-Team wird Ihre Anmeldung prüfen und entscheiden, ob es Sie in die WBF-Spielerdatenbank aufnimmt. Bitte rechnen Sie mit <strong>24–72 Stunden</strong> für die Bearbeitung.",
+    success_text: "Vielen Dank. Das WBF-Team wird Ihre Anmeldung prüfen.",
+    success_li_1: "Bitte rechnen Sie mit <strong>24–72 Stunden</strong> für die Bearbeitung.",
+    success_li_2: "Bis Sie vom WBF-Team in die Datenbank aufgenommen wurden, können Sie sich nicht für EBL- / WBF-Turniere, Meisterschaften oder Veranstaltungen anmelden.",
+    success_li_3: 'Bei dringenden Anliegen oder Problemen wenden Sie sich bitte an <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.',
     ref_label: "Referenz",
     cropper_title: "Foto anpassen",
     cropper_subtitle: "Ziehen Sie, um Ihr Gesicht im Rahmen zu positionieren.",
@@ -915,7 +955,10 @@ const I18N = {
     btn_submit: "Wyślij rejestrację", btn_submitting: "Wysyłanie…",
     btn_submit_another: "Zarejestruj kolejnego",
     success_title: "Rejestracja wysłana",
-    success_text: "Dziękujemy. Zespół WBF rozpatrzy Twoje zgłoszenie i zdecyduje, czy dodać Cię do bazy zawodników WBF. Proszę dać <strong>24-72 godzin</strong> na proces weryfikacji.",
+    success_text: "Dziękujemy. Zespół WBF rozpatrzy Twoje zgłoszenie.",
+    success_li_1: "Proszę dać <strong>24–72 godzin</strong> na proces weryfikacji.",
+    success_li_2: "Dopóki zespół WBF nie doda Cię do bazy, nie możesz rejestrować się na turnieje, mistrzostwa ani wydarzenia EBL / WBF.",
+    success_li_3: 'W pilnych sprawach lub problemach skontaktuj się z <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>.',
     ref_label: "Numer referencyjny",
     cropper_title: "Dostosuj zdjęcie",
     cropper_subtitle: "Przeciągnij, aby ustawić twarz w ramce.",
@@ -971,7 +1014,10 @@ const I18N = {
     btn_submit: "提交注册", btn_submitting: "提交中…",
     btn_submit_another: "再注册一位球员",
     success_title: "注册已提交",
-    success_text: "谢谢。WBF 工作人员将审核您的申请,并决定是否将您添加到 WBF 球员数据库。请预留 <strong>24-72 小时</strong> 的审核时间。",
+    success_text: "谢谢。WBF 工作人员将审核您的申请。",
+    success_li_1: "请预留 <strong>24-72 小时</strong> 的审核时间。",
+    success_li_2: "在 WBF 工作人员将您添加到数据库之前,您无法报名参加 EBL / WBF 的比赛、锦标赛或赛事。",
+    success_li_3: '如有紧急事项或问题,请联系 <a href="mailto:info@worldbridge.org">info@worldbridge.org</a>。',
     ref_label: "参考编号",
     cropper_title: "调整您的照片",
     cropper_subtitle: "拖动以将您的面部置于框内。",
