@@ -1,6 +1,10 @@
 import { put } from '@vercel/blob';
 import postgres from 'postgres';
 
+/* Allow up to 60 seconds for the function (Hobby tier max).
+   Default is 10s which is often not enough for blob upload + DB insert. */
+export const maxDuration = 60;
+
 /* Vercel auto-injects POSTGRES_URL when you add a Postgres integration
    (Neon, Supabase, etc. from the Vercel Marketplace). */
 const sql = postgres(process.env.POSTGRES_URL, { ssl: 'require' });
@@ -22,8 +26,12 @@ function jsonRes(status, body){
 export default async function handler(request){
   if (request.method !== 'POST') return jsonRes(405, { error: 'Method not allowed.' });
 
+  const t0 = Date.now();
+  console.log('[register] start');
+
   try {
     const formData = await request.formData();
+    console.log('[register] formData parsed', { elapsedMs: Date.now() - t0 });
     const get = k => String(formData.get(k) ?? '').trim();
 
     const familyName       = get('familyName');
@@ -63,18 +71,23 @@ export default async function handler(request){
       return jsonRes(413, { error: 'Photograph too large (max 4 MB).' });
     }
 
+    console.log('[register] validation OK', { elapsedMs: Date.now() - t0, photoSize: photo.size });
+
     /* ---- upload photo to Vercel Blob ---- */
     const sanitize = s => s.replace(/[^A-Za-z0-9]/g, '_');
     const ext      = (photo.name?.split('.').pop() || 'jpg').toLowerCase().slice(0, 5);
     const filename = `${sanitize(familyName)}_${sanitize(givenName)}_${Date.now()}.${ext}`;
 
+    console.log('[register] uploading blob:', filename);
     const blob = await put(`photos/${filename}`, photo, {
       access: 'public',
       contentType: photo.type,
       addRandomSuffix: false,
     });
+    console.log('[register] blob uploaded', { elapsedMs: Date.now() - t0, url: blob.url });
 
     /* ---- insert row in Postgres ---- */
+    console.log('[register] inserting row...');
     const rows = await sql`
       INSERT INTO registrations
         (family_name, given_name, gender, country_birth, country_residence,
@@ -84,11 +97,12 @@ export default async function handler(request){
          ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${blob.url}, ${chineseName || null})
       RETURNING id
     `;
+    console.log('[register] row inserted', { elapsedMs: Date.now() - t0, id: rows[0].id });
 
     return jsonRes(200, { success: true, id: rows[0].id });
 
   } catch (err){
-    console.error('register error:', err);
-    return jsonRes(500, { error: 'Server error. Please try again later.' });
+    console.error('[register] error after', Date.now() - t0, 'ms:', err);
+    return jsonRes(500, { error: `Server error: ${err.message || 'unknown'}` });
   }
 }
