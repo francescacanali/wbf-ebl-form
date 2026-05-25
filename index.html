@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WBF · EBL — Player Registration</title>
+<meta name="description" content="Official player registration form for the WBF / EBL shared database.">
+<style>
+:root{
+  --bg:#fafaf9;
+  --surface:#ffffff;
+  --ink:#0a0a0a;
+  --ink-2:#3f3f46;
+  --ink-3:#71717a;
+  --ink-4:#a1a1aa;
+  --line:#e7e5e4;
+  --line-2:#f5f5f4;
+
+  --green-900:#0f3d2e;
+  --green-800:#14532d;
+  --green-700:#166534;
+  --green-600:#15803d;
+  --green-50:#f0fdf4;
+
+  --error:#b91c1c;
+  --error-bg:#fef2f2;
+
+  --radius:10px;
+  --radius-sm:6px;
+  --radius-lg:14px;
+
+  --shadow-sm:0 1px 3px rgba(15,23,42,.06),0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg:0 20px 40px -12px rgba(15,23,42,.18),0 8px 16px -8px rgba(15,23,42,.10);
+
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI','Roboto','Helvetica Neue',
+        'PingFang SC','Hiragino Sans GB','Microsoft YaHei',Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Menlo','Consolas',monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--font);background:var(--bg);color:var(--ink);
+  font-size:15px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+  min-height:100vh;
+}
+
+.shell{max-width:680px;margin:0 auto;padding:3rem 1.5rem 4rem}
+
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:3rem}
+.brand{display:flex;align-items:center;gap:.85rem}
+.brand-logo{
+  height:42px;width:auto;display:block;
+  object-fit:contain;flex-shrink:0;
+}
+.brand-mark{
+  width:32px;height:32px;background:var(--green-800);color:#fff;
+  border-radius:8px;display:grid;place-items:center;
+  font-weight:700;font-size:.9rem;letter-spacing:-.02em;
+}
+.brand-text{
+  display:flex;flex-direction:column;
+  font-weight:600;font-size:.92rem;letter-spacing:-.01em;
+  line-height:1.2;color:var(--ink);
+}
+.brand-text span{
+  color:var(--ink-3);font-weight:400;font-size:.75rem;
+  margin-left:0;margin-top:1px;letter-spacing:.01em;
+}
+.header-tag{
+  font-size:.75rem;color:var(--ink-3);background:var(--surface);
+  border:1px solid var(--line);padding:.35rem .65rem;border-radius:99px;
+  display:inline-flex;align-items:center;gap:.4rem;
+}
+.header-tag::before{
+  content:'';width:6px;height:6px;border-radius:50%;
+  background:var(--green-600);box-shadow:0 0 0 3px rgba(21,128,61,.15);
+}
+
+.intro{margin-bottom:2.5rem}
+.intro h1{font-size:2rem;font-weight:700;letter-spacing:-.022em;line-height:1.15;margin-bottom:.75rem}
+.intro h1 .accent{color:var(--green-800)}
+.intro p{color:var(--ink-2);font-size:1rem;max-width:580px;line-height:1.6}
+
+.form-card{
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius-lg);padding:2rem;box-shadow:var(--shadow-sm);
+}
+.section + .section{margin-top:2rem;padding-top:2rem;border-top:1px solid var(--line-2)}
+.section-head{display:flex;align-items:center;gap:.65rem;margin-bottom:1.25rem}
+.section-num{
+  width:22px;height:22px;background:var(--green-50);color:var(--green-800);
+  border-radius:6px;display:grid;place-items:center;
+  font-size:.7rem;font-weight:700;font-variant-numeric:tabular-nums;
+}
+.section-title{font-size:.95rem;font-weight:600;letter-spacing:-.005em}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:.95rem}
+.grid-full{grid-column:1 / -1}
+
+.field{display:flex;flex-direction:column;gap:.4rem;position:relative}
+.field label{font-size:.78rem;font-weight:500;color:var(--ink-2)}
+.field label .req{color:var(--green-700);margin-left:2px;font-weight:600}
+
+.field input,.field select{
+  font-family:var(--font);font-size:.95rem;padding:.7rem .8rem;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);color:var(--ink);outline:none;
+  width:100%;appearance:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.field input::placeholder{color:var(--ink-4)}
+.field input:hover,.field select:hover{border-color:#d4d4d8}
+.field input:focus,.field select:focus{
+  border-color:var(--green-700);box-shadow:0 0 0 3px rgba(22,101,52,.12);
+}
+.field select{
+  background:var(--surface) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%2371717a' d='M6 7.5L0.5 2 1.91 0.59 6 4.67 10.09 0.59 11.5 2z'/></svg>") no-repeat right .8rem center;
+  background-size:11px;padding-right:2rem;cursor:pointer;
+}
+.field .hint{font-size:.75rem;color:var(--ink-3);margin-top:.15rem}
+.field .err{font-size:.75rem;color:var(--error);margin-top:.15rem;display:none}
+.field.invalid input,.field.invalid select{border-color:var(--error);background-color:var(--error-bg)}
+.field.invalid input:focus,.field.invalid select:focus{box-shadow:0 0 0 3px rgba(185,28,28,.10)}
+.field.invalid .err{display:block}
+.field.invalid .hint{display:none}
+
+/* === Photo upload === */
+.photo-up{
+  border:1px dashed var(--line);border-radius:var(--radius);
+  padding:.9rem;display:flex;align-items:center;gap:.9rem;
+  cursor:pointer;background:var(--surface);
+  transition:background .15s, border-color .15s;
+}
+.photo-up:hover{background:var(--green-50);border-color:var(--green-700)}
+.photo-up input[type=file]{display:none}
+.photo-preview{
+  width:54px;height:54px;background:var(--line-2);border-radius:8px;
+  flex-shrink:0;background-size:cover;background-position:center;
+  display:grid;place-items:center;color:var(--ink-3);font-size:1.3rem;
+}
+.photo-info{flex:1;min-width:0}
+.photo-info strong{
+  display:block;font-size:.9rem;font-weight:600;margin-bottom:2px;color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.photo-info small{font-size:.75rem;color:var(--ink-3)}
+.photo-edit{
+  font-size:.72rem;font-weight:600;color:var(--green-700);
+  background:var(--green-50);padding:.25rem .55rem;border-radius:99px;
+  margin-left:auto;display:none;
+}
+.photo-up.has-photo .photo-edit{display:inline-block}
+
+/* === Banner === */
+.banner{
+  display:none;margin-top:1rem;padding:.75rem .9rem;
+  background:var(--error-bg);border:1px solid #fecaca;
+  border-radius:var(--radius);font-size:.85rem;color:var(--error);
+}
+.banner.active{display:block}
+
+/* === Actions === */
+.actions{
+  margin-top:2rem;padding-top:1.5rem;border-top:1px solid var(--line-2);
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+}
+.disclaimer{font-size:.78rem;color:var(--ink-3);max-width:330px;line-height:1.5}
+.btn{
+  font-family:var(--font);font-size:.9rem;font-weight:600;
+  padding:.75rem 1.5rem;background:var(--green-800);color:#fff;
+  border:none;border-radius:var(--radius);cursor:pointer;
+  display:inline-flex;align-items:center;gap:.5rem;
+  transition:background .15s, transform .1s, box-shadow .15s;
+  box-shadow:0 1px 2px rgba(15,61,46,.2), inset 0 1px 0 rgba(255,255,255,.1);
+  white-space:nowrap;
+}
+.btn:hover{
+  background:var(--green-700);
+  box-shadow:0 4px 12px rgba(15,61,46,.22), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.65;cursor:wait}
+.btn svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.btn-ghost{
+  background:transparent;color:var(--ink-2);
+  border:1px solid var(--line);box-shadow:none;
+}
+.btn-ghost:hover{background:var(--line-2);box-shadow:none}
+
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* === Success === */
+.success{display:none;text-align:center;padding:2rem 1.5rem}
+.success.active{display:block}
+.success-mark{
+  width:60px;height:60px;background:var(--green-50);color:var(--green-700);
+  border-radius:50%;display:grid;place-items:center;
+  margin:0 auto 1.5rem;font-size:1.8rem;
+}
+.success h2{font-size:1.4rem;font-weight:700;margin-bottom:.6rem;letter-spacing:-.015em}
+.success p{color:var(--ink-2);font-size:.95rem;max-width:460px;margin:0 auto .75rem;line-height:1.6}
+.ref-id{
+  background:var(--line-2);padding:.65rem 1rem;border-radius:var(--radius-sm);
+  margin:1.5rem auto;max-width:300px;font-size:.85rem;color:var(--ink-2);
+  font-family:var(--mono);border:1px solid var(--line);
+}
+.ref-id strong{color:var(--green-800)}
+
+.footer{margin-top:2.5rem;font-size:.75rem;color:var(--ink-4);text-align:center}
+
+/* ================== CROPPER MODAL ================== */
+.cropper-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,10,10,.55);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;
+  padding:1.5rem;z-index:1000;
+  opacity:0;transition:opacity .2s ease;
+}
+.cropper-overlay.active{display:flex;opacity:1}
+.cropper-card{
+  background:var(--surface);border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-lg);
+  width:100%;max-width:380px;
+  display:flex;flex-direction:column;
+  transform:scale(.96);transition:transform .2s ease;
+}
+.cropper-overlay.active .cropper-card{transform:scale(1)}
+.cropper-head{
+  padding:1.1rem 1.25rem .75rem;
+  border-bottom:1px solid var(--line-2);
+}
+.cropper-head h3{font-size:1rem;font-weight:600;letter-spacing:-.005em;margin-bottom:.2rem}
+.cropper-head p{font-size:.78rem;color:var(--ink-3)}
+.cropper-body{padding:1.25rem;display:flex;flex-direction:column;align-items:center;gap:1rem}
+.cropper-canvas-wrap{
+  position:relative;
+  width:250px;height:313px;
+  border-radius:var(--radius);
+  overflow:hidden;background:#000;
+  box-shadow:inset 0 0 0 1px var(--line);
+}
+.cropper-canvas-wrap canvas{
+  display:block;width:100%;height:100%;
+  cursor:grab;touch-action:none;
+  user-select:none;-webkit-user-select:none;
+}
+.cropper-canvas-wrap canvas:active{cursor:grabbing}
+/* Grid overlay for visual alignment */
+.cropper-canvas-wrap::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to right, transparent calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% + .5px), transparent calc(33.33% + .5px)),
+    linear-gradient(to right, transparent calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% + .5px), transparent calc(66.66% + .5px)),
+    linear-gradient(to bottom, transparent calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% - .5px), rgba(255,255,255,.25) calc(33.33% + .5px), transparent calc(33.33% + .5px)),
+    linear-gradient(to bottom, transparent calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% - .5px), rgba(255,255,255,.25) calc(66.66% + .5px), transparent calc(66.66% + .5px));
+  border:2px solid rgba(255,255,255,.6);
+  border-radius:var(--radius);
+}
+.cropper-zoom{
+  width:100%;display:flex;align-items:center;gap:.65rem;
+  padding:0 .25rem;
+}
+.cropper-zoom svg{width:16px;height:16px;flex-shrink:0;stroke:var(--ink-3);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.cropper-zoom input[type=range]{
+  flex:1;-webkit-appearance:none;appearance:none;
+  height:4px;background:var(--line);border-radius:2px;outline:none;
+}
+.cropper-zoom input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green-800);cursor:grab;
+  box-shadow:0 1px 3px rgba(15,61,46,.3);
+  border:2px solid #fff;
+  transition:transform .1s;
+}
+.cropper-zoom input[type=range]::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.1)}
+.cropper-zoom input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--green-800);cursor:grab;
+  border:2px solid #fff;box-shadow:0 1px 3px rgba(15,61,46,.3);
+}
+.cropper-help{font-size:.73rem;color:var(--ink-3);text-align:center}
+.cropper-foot{
+  display:flex;gap:.5rem;
+  padding:1rem 1.25rem 1.25rem;
+  border-top:1px solid var(--line-2);
+}
+.cropper-foot .btn{flex:1;justify-content:center;font-size:.85rem;padding:.65rem 1rem}
+
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.reveal{animation:rise .5s cubic-bezier(.16,1,.3,1) backwards}
+.reveal:nth-child(1){animation-delay:.02s}
+.reveal:nth-child(2){animation-delay:.1s}
+.reveal:nth-child(3){animation-delay:.18s}
+
+@media (max-width:640px){
+  .shell{padding:2rem 1.1rem 3rem}
+  .form-card{padding:1.5rem 1.1rem;border-radius:12px}
+  .intro h1{font-size:1.65rem}
+  .grid{grid-template-columns:1fr;gap:.9rem}
+  .actions{flex-direction:column;align-items:stretch}
+  .btn{justify-content:center;padding:.85rem 1.5rem}
+  .header{margin-bottom:2rem}
+  .section + .section{margin-top:1.75rem;padding-top:1.75rem}
+  .cropper-card{max-width:none}
+  .cropper-canvas-wrap{width:230px;height:288px}
+}
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <header class="header reveal">
+    <div class="brand">
+      <img src="https://championships.worldbridge.org/wp-content/uploads/2026/01/WBF-transp@3x.png" alt="WBF" class="brand-logo" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'brand-mark',textContent:'W'}))">
+      <div class="brand-text">
+        World Bridge Federation
+        <span>Player Registration</span>
+      </div>
+    </div>
+    <div class="header-tag">Secure form</div>
+  </header>
+
+  <section class="intro reveal">
+    <h1>Player <span class="accent">registration</span>.</h1>
+    <p>Add your profile to the World Bridge Federation &amp; European Bridge League shared player database. Name fields accept Latin letters only — no accents.</p>
+  </section>
+
+  <main id="formMain" class="reveal">
+
+    <form class="form-card" id="registrationForm" novalidate autocomplete="on">
+
+      <!-- 01 IDENTITY -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">1</span><h2 class="section-title">Identity</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="familyName">Family name<span class="req">*</span></label>
+            <input type="text" id="familyName" name="familyName" required maxlength="60" autocomplete="family-name" placeholder="Rossi">
+            <div class="hint">Latin letters only · no accents.</div>
+            <div class="err">Use only basic Latin letters (A–Z), no accents.</div>
+          </div>
+          <div class="field">
+            <label for="givenName">Given name<span class="req">*</span></label>
+            <input type="text" id="givenName" name="givenName" required maxlength="60" autocomplete="given-name" placeholder="Marco">
+            <div class="hint">Latin letters only · no accents.</div>
+            <div class="err">Use only basic Latin letters (A–Z), no accents.</div>
+          </div>
+          <div class="field">
+            <label for="gender">Gender<span class="req">*</span></label>
+            <select id="gender" name="gender" required>
+              <option value="">Select…</option>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+            <div class="err">Please select a gender.</div>
+          </div>
+          <div class="field">
+            <label for="dateOfBirth">Date of birth<span class="req">*</span></label>
+            <input type="date" id="dateOfBirth" name="dateOfBirth" required>
+            <div class="err">Please enter a valid date.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 ORIGIN & CONTACT -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">2</span><h2 class="section-title">Origin &amp; contact</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="countryBirth">Country of birth<span class="req">*</span></label>
+            <select id="countryBirth" name="countryBirth" required></select>
+            <div class="err">Please select your country of birth.</div>
+          </div>
+          <div class="field">
+            <label for="countryResidence">Country of residence<span class="req">*</span></label>
+            <select id="countryResidence" name="countryResidence" required></select>
+            <div class="err">Please select your country of residence.</div>
+          </div>
+          <div class="field">
+            <label for="email">E-mail<span class="req">*</span></label>
+            <input type="email" id="email" name="email" required maxlength="120" autocomplete="email" placeholder="name@example.com">
+            <div class="err">Please enter a valid e-mail address.</div>
+          </div>
+          <div class="field">
+            <label for="phone">Phone<span class="req">*</span></label>
+            <input type="tel" id="phone" name="phone" required maxlength="30" autocomplete="tel" placeholder="+39 333 1234567">
+            <div class="hint">Include country code.</div>
+            <div class="err">Please enter a valid phone number.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 AFFILIATION & PHOTO -->
+      <div class="section">
+        <div class="section-head"><span class="section-num">3</span><h2 class="section-title">Affiliation &amp; photograph</h2></div>
+        <div class="grid">
+          <div class="field">
+            <label for="affiliationCode">National affiliation code<span class="req">*</span></label>
+            <input type="text" id="affiliationCode" name="affiliationCode" required maxlength="40" placeholder="ITA-12345">
+            <div class="hint">Federation code or membership number.</div>
+            <div class="err">Please enter your affiliation code.</div>
+          </div>
+          <div class="field">
+            <label for="chineseName">Chinese name · 中文姓名</label>
+            <input type="text" id="chineseName" name="chineseName" maxlength="40" placeholder="可选 · Optional">
+            <div class="hint">Optional · Chinese characters accepted.</div>
+          </div>
+          <div class="field grid-full">
+            <label for="photo">Profile photograph<span class="req">*</span></label>
+            <label class="photo-up" for="photo" id="photoUp">
+              <div class="photo-preview" id="photoPreview">+</div>
+              <div class="photo-info">
+                <strong id="photoLabel">Upload a photograph</strong>
+                <small id="photoSize">JPG, PNG or WEBP · A cropping tool will open after selection</small>
+              </div>
+              <span class="photo-edit" id="photoEdit">Re-crop</span>
+              <input type="file" id="photo" name="photo" accept="image/jpeg,image/png,image/webp" required>
+            </label>
+            <div class="err">A profile photograph is required.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="banner" id="errorBanner"></div>
+
+      <div class="actions">
+        <p class="disclaimer">By submitting you authorise WBF and EBL to store the data above in their shared player database.</p>
+        <button type="submit" class="btn" id="submitBtn">
+          <span id="submitIcon"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg></span>
+          <span id="submitText">Submit registration</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="form-card success" id="successPanel">
+      <div class="success-mark">✓</div>
+      <h2>Registration received</h2>
+      <p>Your profile has been added to the WBF · EBL shared database. A confirmation will be sent to the e-mail address provided.</p>
+      <div class="ref-id">Reference: <strong id="refId"></strong></div>
+      <button type="button" class="btn" onclick="resetForm()">Submit another</button>
+    </div>
+
+  </main>
+
+  <footer class="footer">WBF · EBL Member Database</footer>
+</div>
+
+<!-- =========== CROPPER MODAL =========== -->
+<div class="cropper-overlay" id="cropperOverlay" role="dialog" aria-modal="true" aria-labelledby="cropperTitle">
+  <div class="cropper-card">
+    <div class="cropper-head">
+      <h3 id="cropperTitle">Adjust your photograph</h3>
+      <p>Drag to position your face inside the frame.</p>
+    </div>
+    <div class="cropper-body">
+      <div class="cropper-canvas-wrap">
+        <canvas id="cropperCanvas" width="250" height="313"></canvas>
+      </div>
+      <div class="cropper-zoom">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg>
+        <input type="range" id="cropperZoom" min="1" max="4" step="0.01" value="1">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6M11 8v6"/></svg>
+      </div>
+      <p class="cropper-help">Centre your face within the grid · output 500×626 px</p>
+    </div>
+    <div class="cropper-foot">
+      <button type="button" class="btn btn-ghost" id="cropperCancel">Cancel</button>
+      <button type="button" class="btn" id="cropperApply">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        Apply
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* === Countries === */
+const COUNTRIES = [
+  "Afghanistan","Albania","Algeria","Andorra","Angola","Argentina","Armenia","Australia","Austria","Azerbaijan",
+  "Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia",
+  "Bosnia and Herzegovina","Botswana","Brazil","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon",
+  "Canada","Cape Verde","Chad","Chile","China","Colombia","Costa Rica","Croatia","Cuba","Cyprus","Czech Republic",
+  "Denmark","Dominican Republic","Ecuador","Egypt","El Salvador","Estonia","Ethiopia","Faroe Islands","Fiji","Finland",
+  "France","Gabon","Georgia","Germany","Ghana","Greece","Grenada","Guatemala","Guyana","Haiti","Honduras","Hong Kong",
+  "Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Israel","Italy","Jamaica","Japan","Jordan",
+  "Kazakhstan","Kenya","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Liberia","Libya","Liechtenstein","Lithuania",
+  "Luxembourg","Macau","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Mauritius","Mexico","Moldova",
+  "Monaco","Mongolia","Montenegro","Morocco","Mozambique","Myanmar","Namibia","Nepal","Netherlands","New Zealand",
+  "Nicaragua","Nigeria","North Macedonia","Norway","Oman","Pakistan","Palestine","Panama","Paraguay","Peru",
+  "Philippines","Poland","Portugal","Qatar","Romania","Russia","Rwanda","San Marino","Saudi Arabia","Senegal",
+  "Serbia","Singapore","Slovakia","Slovenia","South Africa","South Korea","Spain","Sri Lanka","Sudan","Sweden",
+  "Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Trinidad and Tobago","Tunisia","Turkey",
+  "Turkmenistan","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States","Uruguay","Uzbekistan",
+  "Venezuela","Vietnam","Yemen","Zambia","Zimbabwe"
+];
+['countryBirth','countryResidence'].forEach(id=>{
+  document.getElementById(id).innerHTML='<option value="">Select country…</option>'+
+    COUNTRIES.map(c=>`<option value="${c}">${c}</option>`).join('');
+});
+
+/* === Strict Latin (NO accents) — with visible error feedback === */
+const LATIN_RE = /^[A-Za-z\s'\-\.]+$/;
+const LATIN_CHAR_RE = /[A-Za-z\s'\-\.]/;
+['familyName','givenName'].forEach(id=>{
+  const input  = document.getElementById(id);
+  const wrap   = input.closest('.field');
+  const errEl  = wrap.querySelector('.err');
+  const defaultErr = errEl.textContent;
+  let clearTimer;
+
+  input.addEventListener('input', e => {
+    const v = e.target.value;
+    const stripped = Array.from(v).filter(ch => !LATIN_CHAR_RE.test(ch));
+
+    if (stripped.length > 0){
+      /* Remove bad characters, keep cursor position */
+      const cleaned = Array.from(v).filter(ch => LATIN_CHAR_RE.test(ch)).join('');
+      const pos = e.target.selectionStart - (v.length - cleaned.length);
+      e.target.value = cleaned;
+      try { e.target.setSelectionRange(pos, pos); } catch(_) {}
+
+      /* Show a specific message naming the rejected character */
+      const ch = stripped[0];
+      errEl.textContent = `"${ch}" is not allowed — Latin letters only, no accents.`;
+      wrap.classList.add('invalid');
+
+      clearTimeout(clearTimer);
+      clearTimer = setTimeout(() => {
+        errEl.textContent = defaultErr;
+        if (LATIN_RE.test(e.target.value) || !e.target.value){
+          wrap.classList.remove('invalid');
+        }
+      }, 2500);
+    }
+  });
+});
+
+/* === Photo + cropper === */
+const photoInput   = document.getElementById('photo');
+const photoUp      = document.getElementById('photoUp');
+const photoPreview = document.getElementById('photoPreview');
+const photoLabel   = document.getElementById('photoLabel');
+const photoSize    = document.getElementById('photoSize');
+
+const overlay   = document.getElementById('cropperOverlay');
+const canvas    = document.getElementById('cropperCanvas');
+const ctx       = canvas.getContext('2d');
+const zoomInput = document.getElementById('cropperZoom');
+const cancelBtn = document.getElementById('cropperCancel');
+const applyBtn  = document.getElementById('cropperApply');
+
+const CROP_DISPLAY_W = 250;   // matches CSS · 250:313 ratio
+const CROP_DISPLAY_H = 313;
+const CROP_OUTPUT_W  = 500;   // final pixel resolution
+const CROP_OUTPUT_H  = 626;
+const MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
+
+let croppedBlob = null;   // <- what we actually send
+let lastSourceFile = null;
+let state = {
+  img: null,
+  baseScale: 1,
+  zoom: 1,
+  x: 0, y: 0,
+  dragging: false,
+  dragStartX: 0, dragStartY: 0,
+  origX: 0, origY: 0,
+  pinchStartDist: 0,
+  pinchStartZoom: 1,
+};
+
+photoInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024){
+    alert('Source image too large (max 15 MB). After cropping it will be reduced.');
+    photoInput.value = '';
+    return;
+  }
+  lastSourceFile = file;
+  openCropper(file);
+});
+
+/* Re-crop click — when user already has a photo, allow re-opening */
+photoUp.addEventListener('click', e => {
+  if (photoUp.classList.contains('has-photo') && e.target.id === 'photoEdit' && lastSourceFile){
+    e.preventDefault();
+    openCropper(lastSourceFile);
+  }
+});
+
+function openCropper(file){
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    URL.revokeObjectURL(url);
+    state.img = img;
+    state.baseScale = Math.max(CROP_DISPLAY_W / img.naturalWidth, CROP_DISPLAY_H / img.naturalHeight);
+    state.zoom = 1;
+    state.x = 0; state.y = 0;
+    zoomInput.value = '1';
+    draw();
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+  img.onerror = () => {
+    URL.revokeObjectURL(url);
+    alert('Could not load that image.');
+    photoInput.value = '';
+  };
+  img.src = url;
+}
+
+function closeCropper(){
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  state.img = null;
+}
+
+function draw(){
+  const { img, baseScale, zoom, x, y } = state;
+  if (!img) return;
+  /* Scale for crispness on high-DPI screens */
+  const dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== CROP_DISPLAY_W * dpr){
+    canvas.width  = CROP_DISPLAY_W * dpr;
+    canvas.height = CROP_DISPLAY_H * dpr;
+  }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, CROP_DISPLAY_W, CROP_DISPLAY_H);
+
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const dx = (CROP_DISPLAY_W - w) / 2 + x;
+  const dy = (CROP_DISPLAY_H - h) / 2 + y;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(img, dx, dy, w, h);
+}
+
+function constrain(){
+  const { img, baseScale, zoom } = state;
+  if (!img) return;
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const maxX = Math.max(0, (w - CROP_DISPLAY_W) / 2);
+  const maxY = Math.max(0, (h - CROP_DISPLAY_H) / 2);
+  state.x = Math.max(-maxX, Math.min(maxX, state.x));
+  state.y = Math.max(-maxY, Math.min(maxY, state.y));
+}
+
+/* === Mouse === */
+canvas.addEventListener('mousedown', e => {
+  state.dragging = true;
+  state.dragStartX = e.clientX; state.dragStartY = e.clientY;
+  state.origX = state.x; state.origY = state.y;
+});
+window.addEventListener('mousemove', e => {
+  if (!state.dragging) return;
+  state.x = state.origX + (e.clientX - state.dragStartX);
+  state.y = state.origY + (e.clientY - state.dragStartY);
+  constrain(); draw();
+});
+window.addEventListener('mouseup', () => { state.dragging = false; });
+
+/* === Wheel zoom === */
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = -e.deltaY * 0.002;
+  state.zoom = Math.max(1, Math.min(4, state.zoom + delta));
+  zoomInput.value = state.zoom;
+  constrain(); draw();
+}, { passive: false });
+
+/* === Touch (pan + pinch) === */
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1){
+    state.dragging = true;
+    state.dragStartX = e.touches[0].clientX;
+    state.dragStartY = e.touches[0].clientY;
+    state.origX = state.x; state.origY = state.y;
+  } else if (e.touches.length === 2){
+    state.dragging = false;
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    state.pinchStartDist = Math.hypot(dx, dy);
+    state.pinchStartZoom = state.zoom;
+  }
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1 && state.dragging){
+    state.x = state.origX + (e.touches[0].clientX - state.dragStartX);
+    state.y = state.origY + (e.touches[0].clientY - state.dragStartY);
+  } else if (e.touches.length === 2){
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    const factor = dist / state.pinchStartDist;
+    state.zoom = Math.max(1, Math.min(4, state.pinchStartZoom * factor));
+    zoomInput.value = state.zoom;
+  }
+  constrain(); draw();
+}, { passive: false });
+canvas.addEventListener('touchend', () => { state.dragging = false; });
+
+/* === Zoom slider === */
+zoomInput.addEventListener('input', e => {
+  state.zoom = parseFloat(e.target.value);
+  constrain(); draw();
+});
+
+/* === Apply / cancel === */
+cancelBtn.addEventListener('click', () => {
+  closeCropper();
+  if (!croppedBlob){
+    photoInput.value = '';
+    lastSourceFile = null;
+  }
+});
+overlay.addEventListener('click', e => {
+  if (e.target === overlay) cancelBtn.click();
+});
+
+applyBtn.addEventListener('click', async () => {
+  const { img, baseScale, zoom, x, y } = state;
+  if (!img) return;
+
+  /* Render to output-sized canvas */
+  const out = document.createElement('canvas');
+  out.width = CROP_OUTPUT_W; out.height = CROP_OUTPUT_H;
+  const octx = out.getContext('2d');
+  octx.imageSmoothingQuality = 'high';
+
+  const outScale = CROP_OUTPUT_W / CROP_DISPLAY_W;  // = OUTPUT_H/DISPLAY_H (matched ratio)
+  const scale = baseScale * zoom;
+  const w = img.naturalWidth  * scale;
+  const h = img.naturalHeight * scale;
+  const dx = (CROP_DISPLAY_W - w) / 2 + x;
+  const dy = (CROP_DISPLAY_H - h) / 2 + y;
+  octx.drawImage(img, dx * outScale, dy * outScale, w * outScale, h * outScale);
+
+  out.toBlob(blob => {
+    if (!blob){ alert('Could not generate the crop.'); return; }
+    if (blob.size > MAX_OUTPUT_BYTES){
+      alert('Cropped image too large. Please use a smaller source.');
+      return;
+    }
+    croppedBlob = blob;
+    showCroppedPreview(blob);
+    closeCropper();
+  }, 'image/jpeg', 0.92);
+});
+
+function showCroppedPreview(blob){
+  const url = URL.createObjectURL(blob);
+  photoPreview.style.backgroundImage = `url(${url})`;
+  photoPreview.textContent = '';
+  photoLabel.textContent = 'Photograph ready';
+  photoSize.textContent = `${(blob.size/1024).toFixed(0)} KB · 500×626 JPEG · cropped`;
+  photoUp.classList.add('has-photo');
+  /* clear invalid state if present */
+  photoUp.closest('.field')?.classList.remove('invalid');
+}
+
+/* === Validation === */
+function validateField(field){
+  const wrap=field.closest('.field');
+  let valid=true;
+  const val=(field.value||'').trim();
+  if(field.required && !val) valid=false;
+  if(field.type==='email' && val) valid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val);
+  if(field.type==='tel' && val) valid = /^[+\d][\d\s().\-]{5,}$/.test(val);
+  if((field.id==='familyName'||field.id==='givenName') && val) valid = LATIN_RE.test(val);
+  if(field.id==='photo') valid = croppedBlob !== null;
+  wrap.classList.toggle('invalid',!valid);
+  return valid;
+}
+
+document.querySelectorAll('#registrationForm input, #registrationForm select')
+  .forEach(field=>{
+    field.addEventListener('blur',()=>validateField(field));
+    field.addEventListener('input',()=>{
+      if(field.closest('.field').classList.contains('invalid')) validateField(field);
+    });
+    field.addEventListener('change',()=>{
+      if(field.closest('.field').classList.contains('invalid')) validateField(field);
+    });
+  });
+
+document.getElementById('dateOfBirth').max = new Date().toISOString().split('T')[0];
+
+/* === Submit === */
+const form        = document.getElementById('registrationForm');
+const submitBtn   = document.getElementById('submitBtn');
+const submitText  = document.getElementById('submitText');
+const submitIcon  = document.getElementById('submitIcon');
+const errorBanner = document.getElementById('errorBanner');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  errorBanner.classList.remove('active');
+
+  let allValid = true;
+  form.querySelectorAll('input[required], select[required]').forEach(f=>{
+    if(!validateField(f)) allValid = false;
+  });
+  if(!allValid){
+    form.querySelector('.field.invalid')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitText.textContent = 'Submitting…';
+  submitIcon.innerHTML = '<span class="spinner"></span>';
+
+  try{
+    /* Build FormData manually so we send the cropped blob,
+       not the original file in the input. */
+    const formData = new FormData();
+    ['familyName','givenName','gender','countryBirth','countryResidence',
+     'dateOfBirth','email','phone','affiliationCode','chineseName'].forEach(k=>{
+      formData.append(k, document.getElementById(k).value.trim());
+    });
+    const lastName  = document.getElementById('familyName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
+    const firstName = document.getElementById('givenName').value.trim().replace(/[^A-Za-z0-9]/g,'_');
+    const photoName = `${lastName}_${firstName}.jpg`;
+    formData.append('photo', croppedBlob, photoName);
+
+    const res = await fetch('/api/register',{ method:'POST', body: formData });
+    if(!res.ok){
+      let msg = 'Submission failed.';
+      try{ const j = await res.json(); if(j.error) msg = j.error; }catch(_){}
+      throw new Error(msg);
+    }
+    const data = await res.json();
+    document.getElementById('refId').textContent = 'WBF-' + String(data.id).padStart(6,'0');
+    showSuccess();
+  }catch(err){
+    console.error(err);
+    errorBanner.textContent = err.message || 'Submission failed. Please try again.';
+    errorBanner.classList.add('active');
+    submitBtn.disabled = false;
+    submitText.textContent = 'Submit registration';
+    submitIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+  }
+});
+
+function showSuccess(){
+  document.getElementById('registrationForm').style.display = 'none';
+  document.getElementById('successPanel').classList.add('active');
+  window.scrollTo({top: document.getElementById('formMain').offsetTop - 40, behavior:'smooth'});
+}
+
+function resetForm(){
+  document.getElementById('registrationForm').reset();
+  document.getElementById('registrationForm').style.display = '';
+  document.getElementById('successPanel').classList.remove('active');
+  errorBanner.classList.remove('active');
+  photoPreview.style.backgroundImage = '';
+  photoPreview.textContent = '+';
+  photoLabel.textContent = 'Upload a photograph';
+  photoSize.textContent  = 'JPG, PNG or WEBP · A cropping tool will open after selection';
+  photoUp.classList.remove('has-photo');
+  croppedBlob = null;
+  lastSourceFile = null;
+  submitBtn.disabled = false;
+  submitText.textContent = 'Submit registration';
+  submitIcon.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 5l7 7-7 7"/></svg>';
+  document.querySelectorAll('.field.invalid').forEach(f=>f.classList.remove('invalid'));
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
