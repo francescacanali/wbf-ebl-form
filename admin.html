@@ -476,47 +476,50 @@ function render(){
       <td><a href="mailto:${esc(r['E-mail'])}">${esc(r['E-mail'])}</a></td>
       <td>${esc(r['Phone'])}</td>
       <td>${esc(r['National affiliation code'])}</td>
-      <td>${(() => {
-        const path = r['Photo'];
-        if (!path) return '';
-        const viewUrl = photoViewUrl(path);
-        const dlUrl   = photoDownloadUrl(path, downloadFilename(r));
-        return `<div class="photo-cell"><a href="${esc(viewUrl)}" target="_blank" rel="noopener" title="View full size"><span class="thumb" style="background-image:url('${esc(viewUrl)}')"></span></a><a class="thumb-dl" href="${esc(dlUrl)}" title="Download photo"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></a></div>`;
-      })()}</td>
+      <td>${r['Photo'] ? `<div class="photo-cell"><a href="${esc(r['Photo'])}" target="_blank" rel="noopener" title="View full size"><span class="thumb" style="background-image:url('${esc(r['Photo'])}')"></span></a><button type="button" class="thumb-dl" data-action="download" data-url="${esc(r['Photo'])}" data-filename="${esc(downloadFilename(r))}" title="Download photo"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button></div>` : ''}</td>
       <td>${esc(r['Chinese name'] || '')}</td>
       <td class="idx">${esc(r.submitted_at || '')}</td>
     </tr>
   `;}).join('');
 }
 
-/* === Photo URL helpers === */
-function photoViewUrl(pathname){
-  /* For inline display in <img> tags. Returns empty string if no pathname. */
-  if (!pathname) return '';
-  return `/api/photo?p=${encodeURIComponent(pathname)}&pwd=${encodeURIComponent(PASSWORD)}`;
-}
-function photoDownloadUrl(pathname, filename){
-  if (!pathname) return '';
-  return `/api/photo?p=${encodeURIComponent(pathname)}&pwd=${encodeURIComponent(PASSWORD)}&download=${encodeURIComponent(filename)}`;
-}
-
 function esc(s){
   return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* === Photo download ===
-   Server sends Content-Disposition: attachment, so the browser saves the file
-   directly when the user clicks the download link. */
+/* === Photo download === */
 function downloadFilename(r){
   const ln = String(r['Family name'] ?? '').replace(/[^A-Za-z0-9]/g, '_');
   const fn = String(r['Given name']  ?? '').replace(/[^A-Za-z0-9]/g, '_');
   return `${ln}_${fn}.jpg`;
 }
 
-/* Toast on click (download itself is handled by the browser via the anchor) */
+async function downloadPhoto(url, filename, btn){
+  if (btn) btn.classList.add('busy');
+  try {
+    const res = await fetch(url, { mode: 'cors' });
+    if (!res.ok) throw new Error('Fetch failed: ' + res.status);
+    const blob = await res.blob();
+    const objUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = objUrl; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(objUrl); a.remove(); }, 200);
+    showToast(`Downloaded ${filename}`);
+  } catch (err){
+    console.error(err);
+    window.open(url, '_blank', 'noopener');
+    showToast('Photo opened in new tab — right-click to save');
+  } finally {
+    if (btn) btn.classList.remove('busy');
+  }
+}
+
 document.getElementById('tbody').addEventListener('click', e => {
-  const dl = e.target.closest('.thumb-dl');
-  if (dl) showToast('Downloading photo…');
+  const btn = e.target.closest('[data-action="download"]');
+  if (!btn) return;
+  e.preventDefault();
+  downloadPhoto(btn.dataset.url, btn.dataset.filename, btn);
 });
 
 /* === Search === */
