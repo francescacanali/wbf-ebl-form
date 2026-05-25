@@ -2,14 +2,8 @@ import { put } from '@vercel/blob';
 import postgres from 'postgres';
 import Busboy from 'busboy';
 
-/* Allow up to 60 seconds for the function (Hobby tier max).
-   Default is 10s which is often not enough for blob upload + DB insert. */
 export const maxDuration = 60;
-
-/* Disable Vercel's default body parser — we'll stream the raw body to busboy. */
-export const config = {
-  api: { bodyParser: false },
-};
+export const config = { api: { bodyParser: false } };
 
 const sql = postgres(process.env.POSTGRES_URL, { ssl: 'require' });
 
@@ -20,7 +14,6 @@ const ALLOWED_GENDERS = ['Female','Male'];
 const ALLOWED_MIME    = ['image/jpeg','image/png','image/webp'];
 const MAX_BYTES       = 4 * 1024 * 1024;
 
-/* === Multipart parsing with busboy === */
 function parseMultipart(req){
   return new Promise((resolve, reject) => {
     const fields = {};
@@ -33,13 +26,9 @@ function parseMultipart(req){
         headers: req.headers,
         limits: { fileSize: MAX_BYTES + 1, files: 1, fields: 30 }
       });
-    } catch (err) {
-      return reject(err);
-    }
+    } catch (err) { return reject(err); }
 
-    bb.on('field', (name, value) => {
-      fields[name] = String(value).trim();
-    });
+    bb.on('field', (name, value) => { fields[name] = String(value).trim(); });
 
     bb.on('file', (name, file, info) => {
       const chunks = [];
@@ -76,12 +65,7 @@ export default async function handler(req, res){
 
   try {
     const { fields, photo } = await parseMultipart(req);
-    console.log('[register] form parsed', {
-      elapsedMs: Date.now() - t0,
-      fieldKeys: Object.keys(fields),
-      hasPhoto: !!photo,
-      photoSize: photo?.buffer?.length || 0,
-    });
+    console.log('[register] form parsed', { elapsedMs: Date.now() - t0 });
 
     const familyName       = fields.familyName       || '';
     const givenName        = fields.givenName        || '';
@@ -94,7 +78,6 @@ export default async function handler(req, res){
     const affiliationCode  = fields.affiliationCode  || '';
     const chineseName      = fields.chineseName      || '';
 
-    /* ---- validation ---- */
     if (!familyName || !givenName || !gender || !countryBirth || !countryResidence
         || !dateOfBirth || !email || !phone || !affiliationCode){
       return res.status(400).json({ error: 'Please complete all required fields.' });
@@ -110,7 +93,6 @@ export default async function handler(req, res){
     if (isNaN(Date.parse(dateOfBirth))){
       return res.status(400).json({ error: 'Invalid date of birth.' });
     }
-
     if (!photo || !photo.buffer || photo.buffer.length === 0){
       return res.status(400).json({ error: 'A profile photograph is required.' });
     }
@@ -118,22 +100,24 @@ export default async function handler(req, res){
       return res.status(400).json({ error: 'Photograph must be JPG, PNG or WEBP.' });
     }
 
-    console.log('[register] validation OK', { elapsedMs: Date.now() - t0 });
+    console.log('[register] validation OK');
 
-    /* ---- upload photo to Vercel Blob ---- */
+    /* Upload photo to private Vercel Blob */
     const sanitize = s => s.replace(/[^A-Za-z0-9]/g, '_');
     const ext      = (photo.filename.split('.').pop() || 'jpg').toLowerCase().slice(0, 5);
-    const filename = `${sanitize(familyName)}_${sanitize(givenName)}_${Date.now()}.${ext}`;
+    const pathname = `photos/${sanitize(familyName)}_${sanitize(givenName)}_${Date.now()}.${ext}`;
 
-    console.log('[register] uploading blob:', filename);
-    const blob = await put(`photos/${filename}`, photo.buffer, {
-      access: 'public',
+    console.log('[register] uploading blob:', pathname);
+    /* For private stores in @vercel/blob v1.x, no `access` parameter is required;
+       the SDK detects the store type automatically via the token. */
+    const blob = await put(pathname, photo.buffer, {
       contentType: photo.mimeType,
       addRandomSuffix: false,
     });
-    console.log('[register] blob uploaded', { elapsedMs: Date.now() - t0, url: blob.url });
+    console.log('[register] blob uploaded', { elapsedMs: Date.now() - t0, returnedUrl: blob.url });
 
-    /* ---- insert row in Postgres ---- */
+    /* Store BOTH the pathname (for proxy access) and the URL (returned by SDK).
+       The proxy endpoint will use the pathname; the URL is kept as backup. */
     console.log('[register] inserting row...');
     const rows = await sql`
       INSERT INTO registrations
@@ -141,7 +125,7 @@ export default async function handler(req, res){
          date_of_birth, email, phone, affiliation_code, photo_url, chinese_name)
       VALUES
         (${familyName}, ${givenName}, ${gender}, ${countryBirth}, ${countryResidence},
-         ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${blob.url}, ${chineseName || null})
+         ${dateOfBirth}, ${email}, ${phone}, ${affiliationCode}, ${pathname}, ${chineseName || null})
       RETURNING id
     `;
     console.log('[register] row inserted', { elapsedMs: Date.now() - t0, id: rows[0].id });
