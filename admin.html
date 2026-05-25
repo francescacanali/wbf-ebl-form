@@ -456,7 +456,7 @@ function render(){
   if (FILTERED.length === 0){
     tbody.innerHTML = `<tr><td colspan="13" class="empty">
       <strong>${DATA.length === 0 ? 'No registrations yet' : 'No matches'}</strong>
-      ${DATA.length === 0 ? 'Once people submit the form, they\\'ll appear here.' : 'Try a different search.'}
+      ${DATA.length === 0 ? 'New registrations will appear here once submitted.' : 'Try a different search.'}
     </td></tr>`;
     return;
   }
