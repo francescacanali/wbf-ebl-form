@@ -185,7 +185,7 @@ async function sendNotificationEmail(data){
   }
 
   const from = process.env.NOTIFY_FROM || 'WBF Registrations <onboarding@resend.dev>';
-  const to = ['info@worldbridge.org', 'registration@worldbridge.org'];
+  const to = ['channels4work@gmail.com'];
   const refId = 'WBF-' + String(data.id).padStart(6, '0');
 
   const esc = s => String(s ?? '')
