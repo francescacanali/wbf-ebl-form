@@ -145,15 +145,22 @@ export default async function handler(req, res){
     `;
     console.log('[register] row inserted', { elapsedMs: Date.now() - t0, id: rows[0].id });
 
-    /* === Best-effort notification email — never fails the registration === */
-    sendNotificationEmail({
-      id: rows[0].id,
-      familyName, givenName, gender,
-      countryBirth, countryResidence,
-      dateOfBirth: dobIso, email, phone,
-      affiliationCode, chineseName,
-      photoUrl: blob.url,
-    }).catch(err => console.warn('[register] email notification failed:', err?.message || err));
+    /* === Notification email — must await so Vercel doesn't kill the function
+       before the fetch to Resend completes. Errors don't fail the registration. === */
+    console.log('[register] sending notification email...');
+    try {
+      await sendNotificationEmail({
+        id: rows[0].id,
+        familyName, givenName, gender,
+        countryBirth, countryResidence,
+        dateOfBirth: dobIso, email, phone,
+        affiliationCode, chineseName,
+        photoUrl: blob.url,
+      });
+    } catch (err) {
+      console.warn('[register] email notification failed:', err?.message || err);
+    }
+    console.log('[register] handler done, returning success');
 
     return res.status(200).json({ success: true, id: rows[0].id });
 
